@@ -509,3 +509,174 @@ function renderWinTable(winProbs) {
     el.appendChild(row);
   });
 }
+
+// ═══════════════════════════════════════════════
+//  VERDICT SECTION
+// ═══════════════════════════════════════════════
+function renderVerdicts(sfProbs, winProbs) {
+  // Remove old verdict if exists
+  const old = document.getElementById('verdictSection');
+  if (old) old.remove();
+
+  const anchor = document.getElementById('resultsContent');
+  if (!anchor) return;
+
+  const top4 = sfProbs.slice(0, 4);
+  const champion = winProbs[0].t;
+  const runnerUp = winProbs[1].t;
+
+  // Final verdict banner
+  const champ = TEAMS[champion], runner = TEAMS[runnerUp];
+  const champWin = winProbs[0].pct;
+  const runnerWin = winProbs[1].pct;
+
+  // Key duel players
+  const duels = [
+    { a: PLAYER_DATA[champion]?.[0], b: PLAYER_DATA[runnerUp]?.[0], label:'ATTACK DUEL' },
+    { a: PLAYER_DATA[champion]?.[1], b: PLAYER_DATA[runnerUp]?.[1], label:'GK BATTLE' },
+    { a: PLAYER_DATA[champion]?.[2], b: PLAYER_DATA[runnerUp]?.[2], label:'MIDFIELD DUEL' },
+  ];
+
+  const duelsHtml = duels.filter(d => d.a && d.b).map(d => `
+    <div class="fvb-duel">
+      <div>
+        <div class="fvb-player-name">${d.a.name.split(' ').pop()}</div>
+        <div class="fvb-player-role">${champ.flag} ${d.a.role}</div>
+      </div>
+      <div class="fvb-duel-vs">VS</div>
+      <div>
+        <div class="fvb-player-name">${d.b.name.split(' ').pop()}</div>
+        <div class="fvb-player-role">${runner.flag} ${d.b.role}</div>
+      </div>
+      <div style="font-size:9px;color:var(--text3);border-left:1px solid var(--border);padding-left:8px;margin-left:4px;letter-spacing:.08em;font-family:'Barlow Condensed',sans-serif;font-weight:700">${d.label}</div>
+    </div>`).join('');
+
+  const finalBannerHtml = `
+    <div class="final-verdict-banner fade-in">
+      <div class="fvb-title">⚡ SIMULATION VERDICT — THE FINAL</div>
+      <div class="fvb-body">
+        The 100,000-run simulation points to a <strong>${champ.flag} ${champ.name} vs ${runner.flag} ${runner.name}</strong> final — 
+        a rematch of <strong>Qatar 2022</strong>. ${champ.name} edge it at <strong>${champWin.toFixed(1)}%</strong> 
+        driven by ${PLAYER_DATA[champion]?.[0]?.name || 'their star player'}'s 
+        ${PLAYER_DATA[champion]?.[0]?.desc?.split('.')[0] || 'exceptional quality'}. 
+        ${runner.name}'s ${PLAYER_DATA[runnerUp]?.[1]?.name || 'goalkeeper'} 
+        (${PLAYER_DATA[runnerUp]?.[1]?.desc?.split('.')[0] || 'elite GK'}) 
+        keeps it at ${runnerWin.toFixed(1)}% — this is not a one-sided Final.
+        The margin across all 100,000 runs is <strong>${(champWin - runnerWin).toFixed(1)} percentage points</strong>. 
+        Expect a classic.
+      </div>
+      <div class="fvb-duels">${duelsHtml}</div>
+    </div>`;
+
+  // Verdict cards for top 4
+  const verdictCardsHtml = top4.map((item, idx) => {
+    const t    = TEAMS[item.t];
+    const pData = PLAYER_DATA[item.t] || [];
+    const path  = KO_PATH[item.t] || [];
+    const threat = THREAT[item.t] || 3;
+    const medals = ['🥇','🥈','🥉','4️⃣'];
+    const colors  = ['var(--gold)','#a0aec0','#cd7f32','var(--blue2)'];
+    const winPct  = (winProbs.find(w => w.t === item.t)?.pct || 0).toFixed(1);
+    const isChamp = item.t === champion;
+
+    const playersHtml = pData.slice(0, 3).map(p => {
+      const threatDots = Array.from({length:5}, (_,i) => `
+        <div class="threat-dot ${i < Math.round(p.rating/20) ? 'active' : ''}" 
+             style="${i < Math.round(p.rating/20) ? `background:${p.color}` : ''}"></div>`).join('');
+      return `
+        <div class="verdict-player">
+          <div class="player-avatar" style="background:${p.color}20;color:${p.color};border:1px solid ${p.color}40">${p.initials}</div>
+          <div class="player-details">
+            <div class="player-name">${p.name}</div>
+            <div class="player-club">${p.club}</div>
+            <div class="player-role-bar">
+              <span class="player-role-label">${p.role}</span>
+              <span class="player-rating-pill" style="background:${p.color}20;color:${p.color}">${p.rating}</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text3);padding:0 4px 8px;line-height:1.55;margin-top:-4px">${p.desc}</div>`;
+    }).join('');
+
+    const pathChips = path.map(s => `
+      <div class="path-chip">
+        <span style="color:var(--text2)">vs ${s.vs}</span>
+        <span class="chip-pct" style="color:${s.pct >= 70 ? 'var(--neon)' : s.pct >= 50 ? 'var(--gold)' : 'var(--red)'}">${s.pct}%</span>
+      </div>`).join('');
+
+    const threatDots = Array.from({length:5}, (_,i) => `
+      <div class="threat-dot ${i < threat ? 'active' : ''}" 
+           style="${i < threat ? `background:${colors[Math.min(idx,3)]}` : ''}"></div>`).join('');
+
+    const whyWin = t.edge;
+
+    return `
+      <div class="verdict-card fade-in ${idx===0?'rank1':''}" style="animation-delay:${idx*.1}s">
+        <div class="verdict-card-header">
+          <div class="verdict-rank-badge" style="color:${colors[idx]}">${medals[idx]}</div>
+          <div class="verdict-flag">${t.flag}</div>
+          <div class="verdict-team-info">
+            <div class="verdict-team-name" style="color:${colors[idx]}">${t.name}</div>
+            <div class="verdict-sf-pct" style="color:${colors[idx]}">${item.pct.toFixed(1)}% SF · ${winPct}% Title</div>
+            <div class="verdict-history">${t.history}</div>
+          </div>
+          ${isChamp ? `<div style="font-size:22px;margin-left:auto">🏆</div>` : ''}
+        </div>
+        <div class="verdict-body">
+
+          <div class="verdict-label">🎯 Key Players</div>
+          <div class="verdict-players">${playersHtml}</div>
+
+          <div class="verdict-label">⚡ Why They Win</div>
+          <div class="verdict-why">${whyWin}</div>
+
+          <div class="verdict-label">🗺 Knockout Path</div>
+          <div class="verdict-path">${pathChips}</div>
+
+          <div class="threat-meter">
+            <span class="threat-label">TOURNAMENT THREAT</span>
+            <div class="threat-dots">${threatDots}</div>
+            <span class="threat-val" style="color:${colors[idx]}">${['ELITE','HIGH','STRONG','REAL'][idx]}</span>
+          </div>
+
+        </div>
+      </div>`;
+  }).join('');
+
+  // Dark horse callout
+  const dh = sfProbs[4]; // 5th team — biggest dark horse
+  const dhT = TEAMS[dh?.t];
+  const darkHorseHtml = dh ? `
+    <div class="dark-horse-strip fade-in">
+      <div class="dh-icon">${dhT.flag}</div>
+      <div>
+        <div class="dh-title">🐎 DARK HORSE WATCH: ${dhT.name.toUpperCase()} — ${dh.pct.toFixed(1)}% SF PROBABILITY</div>
+        <div class="dh-body">
+          ${dhT.name} sit just outside the top 4 but pose a real threat. 
+          <strong>${PLAYER_DATA[dh.t]?.[0]?.name || dhT.players[0]}</strong> 
+          (${PLAYER_DATA[dh.t]?.[0]?.desc?.split('.')[0] || 'elite quality'}).
+          Their path to the semi-finals requires one major upset — which is exactly what they've done before. 
+          Record: <strong>${dhT.record}</strong>. Watch closely.
+        </div>
+      </div>
+    </div>` : '';
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'verdictSection';
+  wrapper.className = 'verdict-section';
+  wrapper.innerHTML = `
+    <h3 class="subsection-title">🏆 Simulation Verdict — Top 4 Analysis</h3>
+    ${finalBannerHtml}
+    <div class="verdict-grid">${verdictCardsHtml}</div>
+    ${darkHorseHtml}`;
+
+  anchor.appendChild(wrapper);
+}
+
+// ─── Hook into renderResults ───
+const _origRenderResults = renderResults;
+// Override renderResults to also call renderVerdicts
+window.renderResults = function(data) {
+  _origRenderResults(data);
+  renderVerdicts(data.sfProbs, data.winProbs);
+};

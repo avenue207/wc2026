@@ -1299,3 +1299,295 @@ body {
   .h2h-insight { margin: 0 20px 20px; }
   .h2h-prob-bar-wrap { padding: 0 20px 16px; }
 }
+
+/* ══════════════════════════════════════════════
+   VERDICT SECTION
+══════════════════════════════════════════════ */
+.verdict-section { margin-top: 48px; }
+.verdict-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.verdict-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.verdict-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(0,0,0,.4); }
+.verdict-card.rank1 {
+  border-color: #8a5f00;
+  box-shadow: 0 0 40px rgba(232,168,32,.1);
+}
+.verdict-card-header {
+  padding: 20px 20px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.verdict-rank-badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 32px;
+  text-align: center;
+}
+.verdict-flag { font-size: 36px; line-height: 1; flex-shrink: 0; }
+.verdict-team-info { flex: 1; }
+.verdict-team-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: .04em;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.verdict-sf-pct {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: .06em;
+  margin-bottom: 4px;
+}
+.verdict-history {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: .03em;
+}
+
+/* ── Verdict body ── */
+.verdict-body { padding: 16px 20px; }
+.verdict-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .14em;
+  color: var(--text3);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.verdict-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── Key Players ── */
+.verdict-players { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.verdict-player {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color .15s;
+}
+.verdict-player:hover { border-color: var(--border2); }
+.player-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: 'Barlow Condensed', sans-serif;
+  flex-shrink: 0;
+  letter-spacing: .04em;
+}
+.player-details { flex: 1; min-width: 0; }
+.player-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.player-club {
+  font-size: 10px;
+  color: var(--text3);
+  margin-bottom: 4px;
+}
+.player-role-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.player-role-label { font-size: 9px; color: var(--text3); letter-spacing: .06em; font-family: 'Barlow Condensed', sans-serif; font-weight: 600; }
+.player-rating-pill {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 100px;
+}
+
+/* ── Why they win ── */
+.verdict-why {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,.025);
+  border-radius: var(--radius);
+  border-left: 2px solid var(--border2);
+}
+.verdict-why strong { color: var(--text); }
+
+/* ── Path chips ── */
+.verdict-path {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.path-chip {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 100px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.path-chip .chip-pct { font-weight: 800; }
+
+/* ── Threat meter ── */
+.threat-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.threat-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--text3);
+  flex-shrink: 0;
+}
+.threat-dots { display: flex; gap: 3px; }
+.threat-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+}
+.threat-dot.active { border: none; }
+.threat-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+/* ── Final Verdict Banner ── */
+.final-verdict-banner {
+  background: linear-gradient(135deg, #1a1200, #080e16, #001a10);
+  border: 1px solid #8a5f00;
+  border-radius: var(--radius-xl);
+  padding: 32px 36px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.final-verdict-banner::before {
+  content: '🏆';
+  position: absolute;
+  right: -10px;
+  top: -10px;
+  font-size: 120px;
+  opacity: .04;
+  pointer-events: none;
+  line-height: 1;
+}
+.fvb-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: .16em;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+.fvb-body {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.75;
+  margin-bottom: 20px;
+  max-width: 780px;
+}
+.fvb-body strong { color: var(--text); }
+.fvb-duels {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.fvb-duel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 12px;
+}
+.fvb-duel-vs {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: .08em;
+}
+.fvb-player-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+}
+.fvb-player-role { font-size: 10px; color: var(--text3); }
+
+/* ── Dark horse callout ── */
+.dark-horse-strip {
+  background: linear-gradient(135deg, #0a1800, #080e16);
+  border: 1px solid #1a3010;
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 16px;
+}
+.dh-icon { font-size: 28px; flex-shrink: 0; }
+.dh-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--neon);
+  letter-spacing: .06em;
+  margin-bottom: 5px;
+}
+.dh-body { font-size: 12px; color: var(--text2); line-height: 1.65; }
+.dh-body strong { color: var(--text); }
+
+@media (max-width: 600px) {
+  .verdict-grid { grid-template-columns: 1fr; }
+  .final-verdict-banner { padding: 20px; }
+  .fvb-duels { flex-direction: column; }
+}

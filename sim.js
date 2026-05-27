@@ -134,7 +134,7 @@ function runSimulation() {
     const results = { sfProbs, matchups, finals, winProbs, champion, runnerUp, topFinal, t1WinPct, t2WinPct };
 
     // Render
-    renderResults(results);
+    window.renderResults(results);
 
     // Update button
     btn.classList.remove('running');
