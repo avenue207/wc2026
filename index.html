@@ -10,11 +10,9 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <!-- ═══════════════ NOISE OVERLAY ═══════════════ -->
   <div class="noise"></div>
 
-  <!-- ═══════════════ HERO ═══════════════ -->
+  <!-- HERO -->
   <header class="hero">
     <div class="hero-bg">
       <div class="pitch-lines"></div>
@@ -41,40 +39,74 @@
     <div class="scroll-hint">↓ Scroll to explore</div>
   </header>
 
-  <!-- ═══════════════ NAV ═══════════════ -->
+  <!-- NAV -->
   <nav class="sticky-nav" id="stickyNav">
     <div class="nav-inner">
-      <a href="#squads" class="nav-link active" onclick="setActive(this)">Squad Ratings</a>
-      <a href="#bracket" class="nav-link" onclick="setActive(this)">Bracket</a>
-      <a href="#results" class="nav-link" id="resultsNavLink" onclick="setActive(this)">
-        Results
-        <span class="nav-badge" id="navBadge" style="display:none">✓</span>
+      <a href="#squads"   class="nav-link active" onclick="setActive(this)">Squad Ratings</a>
+      <a href="#h2h"      class="nav-link"         onclick="setActive(this)">Head-to-Head</a>
+      <a href="#bracket"  class="nav-link"         onclick="setActive(this)">Bracket</a>
+      <a href="#results"  class="nav-link" id="resultsNavLink" onclick="setActive(this)">
+        Results <span class="nav-badge" id="navBadge" style="display:none">✓</span>
       </a>
-      <a href="#final" class="nav-link" onclick="setActive(this)">Final & Champion</a>
+      <a href="#final"    class="nav-link"         onclick="setActive(this)">Final & Champion</a>
     </div>
   </nav>
 
   <main>
 
-    <!-- ═══════════════ SQUADS ═══════════════ -->
+    <!-- SQUADS -->
     <section id="squads" class="section">
       <div class="section-header">
         <div class="section-number">01</div>
         <div>
           <h2 class="section-title">Squad Ratings</h2>
-          <p class="section-desc">Player quality sourced from 2024–25 club season. Every stat is individually weighted.</p>
+          <p class="section-desc">Player quality sourced from 2024–25 club season. Every stat is individually weighted. Click any card to open Head-to-Head analysis.</p>
         </div>
       </div>
       <div class="teams-grid" id="teamsGrid"></div>
     </section>
 
-    <!-- ═══════════════ BRACKET ═══════════════ -->
-    <section id="bracket" class="section section-alt">
+    <!-- HEAD TO HEAD -->
+    <section id="h2h" class="section section-alt">
       <div class="section-header">
         <div class="section-number">02</div>
         <div>
+          <h2 class="section-title">Head-to-Head Analysis</h2>
+          <p class="section-desc">Select any two teams to see a full statistical breakdown and simulated win probability.</p>
+        </div>
+      </div>
+
+      <!-- Team Selectors -->
+      <div class="h2h-selectors">
+        <div class="h2h-selector-wrap">
+          <label class="selector-label">TEAM A</label>
+          <div class="team-selector" id="selectorA">
+            <div class="selector-grid" id="selectorGridA"></div>
+          </div>
+        </div>
+        <div class="h2h-vs-center">
+          <div class="h2h-vs-badge">VS</div>
+          <button class="swap-btn" onclick="swapTeams()" title="Swap teams">⇄</button>
+        </div>
+        <div class="h2h-selector-wrap">
+          <label class="selector-label">TEAM B</label>
+          <div class="team-selector" id="selectorB">
+            <div class="selector-grid" id="selectorGridB"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- H2H Panel -->
+      <div class="h2h-panel" id="h2hPanel"></div>
+    </section>
+
+    <!-- BRACKET -->
+    <section id="bracket" class="section">
+      <div class="section-header">
+        <div class="section-number">03</div>
+        <div>
           <h2 class="section-title">Bracket Paths</h2>
-          <p class="section-desc">Realistic 2026 draw seedings. Base win % from strength differential — before simulation noise.</p>
+          <p class="section-desc">Realistic 2026 draw seedings. Base win % from strength differential before simulation noise.</p>
         </div>
       </div>
       <div class="bracket-layout">
@@ -83,13 +115,9 @@
           <div id="bracketLeft"></div>
         </div>
         <div class="bracket-center">
-          <div class="sf-node sf-node-1">
-            <div class="sf-label">SF 1</div>
-          </div>
+          <div class="sf-node sf-node-1"><div class="sf-label">SF 1</div></div>
           <div class="trophy-center">⚽</div>
-          <div class="sf-node sf-node-2">
-            <div class="sf-label">SF 2</div>
-          </div>
+          <div class="sf-node sf-node-2"><div class="sf-label">SF 2</div></div>
         </div>
         <div class="bracket-half bracket-right">
           <div class="bracket-half-label right">Right Bracket · Semi-Final 2 ▶</div>
@@ -98,10 +126,10 @@
       </div>
     </section>
 
-    <!-- ═══════════════ RESULTS ═══════════════ -->
-    <section id="results" class="section">
+    <!-- RESULTS -->
+    <section id="results" class="section section-alt">
       <div class="section-header">
-        <div class="section-number">03</div>
+        <div class="section-number">04</div>
         <div>
           <h2 class="section-title">Simulation Results</h2>
           <p class="section-desc">Semi-final qualification probability across 100,000 tournament runs.</p>
@@ -122,10 +150,10 @@
       </div>
     </section>
 
-    <!-- ═══════════════ FINAL & CHAMPION ═══════════════ -->
-    <section id="final" class="section section-alt">
+    <!-- FINAL -->
+    <section id="final" class="section">
       <div class="section-header">
-        <div class="section-number">04</div>
+        <div class="section-number">05</div>
         <div>
           <h2 class="section-title">Final & Champion</h2>
           <p class="section-desc">The simulation's predicted World Cup Final and trophy winner.</p>
@@ -137,7 +165,7 @@
         <button class="cta-btn cta-sm" onclick="runSimulation()">▶ Run Simulation</button>
       </div>
       <div id="finalContent" style="display:none">
-        <div class="final-stage" id="finalStage"></div>
+        <div class="final-stage"  id="finalStage"></div>
         <div class="champion-stage" id="championStage"></div>
         <div class="win-table-wrap">
           <h3 class="subsection-title">All Teams — World Cup Win Probability</h3>
@@ -148,7 +176,6 @@
 
   </main>
 
-  <!-- ═══════════════ FOOTER ═══════════════ -->
   <footer class="footer">
     <div class="footer-inner">
       <span>WC2026 Predictor</span>
