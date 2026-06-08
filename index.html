@@ -19,12 +19,6 @@
       <span class="bw-logo-text">WC<span>2026</span></span>
       <span class="bw-logo-sub">PREDICTOR</span>
     </div>
-    <nav class="bw-header-nav">
-      <a href="#matches" class="bw-hn-link" onclick="switchTab('matches',this)">Matches</a>
-      <a href="#scorer"  class="bw-hn-link" onclick="switchTab('scorer',this)">Golden Boot</a>
-      <a href="#bracket" class="bw-hn-link" onclick="switchTab('bracket',this)">Bracket</a>
-      <a href="#sim"     class="bw-hn-link" onclick="switchTab('sim',this)">Simulation</a>
-    </nav>
     <button class="bw-sim-btn" id="runBtn" onclick="runSimulation()">
       <span id="runBtnText">▶ Run Simulation</span>
     </button>
@@ -48,29 +42,6 @@
 
 <!-- ═══ MAIN LAYOUT ═══ -->
 <div class="bw-layout">
-
-  <!-- SIDEBAR -->
-  <aside class="bw-sidebar">
-    <div class="bw-sb-title">Tournament</div>
-    <a class="bw-sb-link active">⚽ All Matches</a>
-    <a class="bw-sb-link" onclick="filterStage('GRP')">Group Stage</a>
-    <a class="bw-sb-link" onclick="filterStage('R16')">Round of 16</a>
-    <a class="bw-sb-link" onclick="filterStage('QF')">Quarter-Finals</a>
-    <a class="bw-sb-link" onclick="filterStage('SF')">Semi-Finals</a>
-    <a class="bw-sb-link" onclick="filterStage('F')">The Final</a>
-
-    <div class="bw-sb-divider"></div>
-    <div class="bw-sb-title">Simulation</div>
-    <a class="bw-sb-link" onclick="switchTab('sim',null)">SF Probability</a>
-    <a class="bw-sb-link" onclick="switchTab('sim',null)">Final Prediction</a>
-    <a class="bw-sb-link" onclick="switchTab('sim',null)">Champion Pick</a>
-
-    <div class="bw-sb-divider"></div>
-    <div class="bw-sb-title">Markets</div>
-    <a class="bw-sb-link" onclick="switchTab('odds',null)">Asian Handicap</a>
-    <a class="bw-sb-link" onclick="switchTab('scorer',null)">Top Goalscorer</a>
-    <a class="bw-sb-link" onclick="switchTab('bracket',null)">Head-to-Head</a>
-  </aside>
 
   <!-- MAIN CONTENT -->
   <main class="bw-main">

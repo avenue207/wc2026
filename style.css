@@ -55,10 +55,10 @@ a{text-decoration:none;color:inherit}button{font-family:inherit;cursor:pointer}
 .bw-pill-badge{background:#fff;color:var(--green);font-size:9px;font-weight:700;padding:1px 5px;border-radius:100px;margin-left:4px}
 
 /* ══ LAYOUT ══ */
-.bw-layout{display:grid;grid-template-columns:200px 1fr;max-width:1440px;margin:0 auto;min-height:calc(100vh - 104px)}
+.bw-layout{display:grid;grid-template-columns:1fr;max-width:1440px;margin:0 auto;min-height:calc(100vh - 104px)}
 
 /* ══ SIDEBAR ══ */
-.bw-sidebar{background:var(--white);border-right:1px solid var(--border);padding:16px 0;position:sticky;top:104px;height:calc(100vh - 104px);overflow-y:auto}
+.bw-sidebar{display:none}
 .bw-sb-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:10px 16px 4px}
 .bw-sb-link{display:block;padding:8px 16px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;border-left:2px solid transparent}
 .bw-sb-link:hover{background:#f8f9fa;color:var(--text)}

@@ -67,7 +67,7 @@ function runOneTournament() {
 function runSimulation() {
   const btn = document.getElementById('runBtn');
   btn.classList.add('running');
-  btn.querySelector('.btn-text').textContent = 'Simulating…';
+  const btnSpan = document.getElementById('runBtnText'); if (btnSpan) btnSpan.textContent = 'Simulating…';
   btn.disabled = true;
 
   // Use setTimeout to allow UI to update before heavy computation
@@ -138,7 +138,7 @@ function runSimulation() {
 
     // Update button
     btn.classList.remove('running');
-    btn.querySelector('.btn-text').textContent = '✓ Re-run Simulation';
+    const s2 = document.getElementById('runBtnText'); if(s2) s2.textContent = '✓ Re-run Simulation';
     btn.disabled = false;
   }, 80);
 }

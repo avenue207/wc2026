@@ -307,11 +307,21 @@ function buildSVGAvatar(p) {
 
 // ── ASYNC WIKIPEDIA PHOTO LOADER ──
 // Calls Wikipedia REST API from the browser (CORS-safe with origin=*)
+// Wikipedia page titles that differ from player name in TOP_SCORERS
+const WIKI_TITLES = {
+  "Vinícius Jr.":    "Vinícius_Júnior",
+  "Lamine Yamal":    "Lamine_Yamal",
+  "Mikel Oyarzabal": "Mikel_Oyarzabal",
+  "Lautaro Martínez":"Lautaro_Martínez",
+  "Cristiano Ronaldo":"Cristiano_Ronaldo",
+};
+
 async function loadPlayerPhotos() {
   if (typeof TOP_SCORERS === "undefined") return;
   for (const p of TOP_SCORERS) {
     try {
-      const name = encodeURIComponent(p.name.replace(/ /g, "_"));
+      const rawTitle = WIKI_TITLES[p.name] || p.name.replace(/ /g, "_");
+      const name = encodeURIComponent(rawTitle);
       const apiUrl = "https://en.wikipedia.org/w/api.php?action=query&titles=" + name + "&prop=pageimages&pithumbsize=400&format=json&origin=*";
       const res = await fetch(apiUrl, { cache: "force-cache" });
       const data = await res.json();
