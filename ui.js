@@ -682,112 +682,195 @@ window.renderResults = function(data) {
 };
 
 // ═══════════════════════════════════════════════
-//  ASIAN HANDICAP SECTION
+//  ASIAN HANDICAP — FULL TOURNAMENT ENGINE
 // ═══════════════════════════════════════════════
+
+let activeFilter = 'all';
+
 function renderOddsSection() {
-  const el = document.getElementById('ahGrid');
-  const summary = document.getElementById('ahSummary');
-  if (!el || !summary) return;
-
-  // Summary strip
-  const strong  = MATCHES.filter(m => m.rec === 'strong').length;
-  const value   = MATCHES.filter(m => m.rec === 'value').length;
-  const slight  = MATCHES.filter(m => m.rec === 'slight').length;
-  const avoid   = MATCHES.filter(m => m.rec === 'avoid').length;
-  summary.innerHTML = `
-    <div class="ah-sum-card"><div class="ah-sum-num" style="color:#22c55e">${strong}</div><div class="ah-sum-label">Strong value</div></div>
-    <div class="ah-sum-card"><div class="ah-sum-num" style="color:#4ade80">${value}</div><div class="ah-sum-label">Good value</div></div>
-    <div class="ah-sum-card"><div class="ah-sum-num" style="color:#facc15">${slight}</div><div class="ah-sum-label">Slight edge</div></div>
-    <div class="ah-sum-card"><div class="ah-sum-num" style="color:#f97316">${avoid}</div><div class="ah-sum-label">Avoid</div></div>
-    <div class="ah-sum-card"><div class="ah-sum-num" style="color:var(--text2)">${MATCHES.length}</div><div class="ah-sum-label">Matches tracked</div></div>`;
-
+  renderAHSummary();
   renderMatchCards('all');
+  setupAHFilters();
+  setupScrollReveal();
+}
 
-  // Filter buttons
+function renderAHSummary() {
+  const el = document.getElementById('ahSummary');
+  if (!el) return;
+  const counts = { strong:0, value:0, slight:0, avoid:0, neutral:0 };
+  MATCHES.forEach(m => { if(counts[m.rec]!==undefined) counts[m.rec]++; });
+  const totalEdge = MATCHES.filter(m=>m.edge>0).reduce((s,m)=>s+m.edge,0);
+  el.innerHTML = `
+    <div class="ah-sum-card" style="animation-delay:.05s"><div class="ah-sum-num" style="color:#22c55e">${counts.strong}</div><div class="ah-sum-label">Strong value</div></div>
+    <div class="ah-sum-card" style="animation-delay:.1s"><div class="ah-sum-num" style="color:#4ade80">${counts.value}</div><div class="ah-sum-label">Good value</div></div>
+    <div class="ah-sum-card" style="animation-delay:.15s"><div class="ah-sum-num" style="color:#facc15">${counts.slight}</div><div class="ah-sum-label">Slight edge</div></div>
+    <div class="ah-sum-card" style="animation-delay:.2s"><div class="ah-sum-num" style="color:#f97316">${counts.avoid}</div><div class="ah-sum-label">Avoid</div></div>
+    <div class="ah-sum-card" style="animation-delay:.25s"><div class="ah-sum-num" style="color:var(--text2)">${MATCHES.length}</div><div class="ah-sum-label">Matches tracked</div></div>`;
+}
+
+function setupAHFilters() {
   document.querySelectorAll('.ah-filter-btn').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.ah-filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      renderMatchCards(btn.dataset.filter);
+      activeFilter = btn.dataset.filter;
+      renderMatchCards(activeFilter);
     };
   });
 }
 
 function renderMatchCards(filter) {
   const el = document.getElementById('ahGrid');
+  if (!el) return;
   el.innerHTML = '';
-  const list = filter === 'all' ? MATCHES : MATCHES.filter(m => m.rec === filter || (filter === 'value' && m.rec === 'strong'));
 
-  list.forEach((m, idx) => {
-    const cfg  = REC_CONFIG[m.rec];
-    const wL   = waterLabel(m.ah.homePayout);
-    const wR   = waterLabel(m.ah.awayPayout);
-    const edge = m.simCoverAH - m.marketCoverAH;
-    const edgeColor = edge > 5 ? '#22c55e' : edge > 0 ? '#facc15' : '#f97316';
+  const list = filter === 'all' ? MATCHES :
+    filter === 'picks' ? MATCHES.filter(m => m.rec === 'strong' || m.rec === 'value') :
+    MATCHES.filter(m => m.rec === filter);
 
-    const card = document.createElement('div');
-    card.className = 'ah-card fade-in';
-    card.style.animationDelay = (idx * 0.06) + 's';
-    card.style.borderColor = cfg.border;
-    card.innerHTML = `
-      <div class="ah-card-top">
-        <div class="ah-date-badge">${m.date}<br>${m.group}GRP</div>
-        <div class="ah-teams">
-          <div class="ah-team">
-            <span class="ah-team-flag">${m.homeFlag}</span>
-            <span class="ah-team-name">${m.home}</span>
+  if (!list.length) {
+    el.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.06em">No matches in this category</div>`;
+    return;
+  }
+
+  // Group by stage
+  const byStage = {};
+  list.forEach(m => {
+    if (!byStage[m.stage]) byStage[m.stage] = [];
+    byStage[m.stage].push(m);
+  });
+
+  const stageOrder = ['GRP','R32','R16','QF','SF','F'];
+  const stageNames = { GRP:'Group Stage', R32:'Round of 32', R16:'Round of 16', QF:'Quarter-Finals', SF:'Semi-Finals', F:'The Final' };
+
+  let cardIdx = 0;
+  stageOrder.forEach(stageKey => {
+    if (!byStage[stageKey]) return;
+    const divider = document.createElement('div');
+    divider.className = 'stage-divider';
+    divider.style.animationDelay = (cardIdx * 0.04) + 's';
+    const stageIcon = {GRP:'⚽',R32:'🏆',R16:'⚡',QF:'🔥',SF:'💥',F:'🏅'}[stageKey] || '⚽';
+    divider.textContent = `${stageIcon} ${stageNames[stageKey] || stageKey}`;
+    if (stageKey !== 'GRP') {
+      const projBadge = document.createElement('span');
+      projBadge.style.cssText = 'font-size:9px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:600;letter-spacing:.06em;margin-left:8px';
+      projBadge.textContent = 'PROJECTED LINE';
+      divider.appendChild(projBadge);
+    }
+    el.appendChild(divider);
+
+    byStage[stageKey].forEach((m, i) => {
+      el.appendChild(buildMatchCard(m, cardIdx++));
+    });
+  });
+
+  setupScrollReveal();
+}
+
+function buildMatchCard(m, idx) {
+  const cfg = REC_CONFIG[m.rec];
+  const wH = waterLabel(m.ah.homePayout);
+  const wA = waterLabel(m.ah.awayPayout);
+  const edgeColor = m.edge >= 10 ? '#22c55e' : m.edge >= 4 ? '#4ade80' : m.edge >= 0 ? '#facc15' : '#f97316';
+  const edgeBarW = Math.min(Math.abs(m.edge) * 3, 100);
+
+  // Build player avatars
+  const homePlayers = (m.homePlayers || []).flatMap(code => (KEY_PLAYERS[code] || []).slice(0,3));
+  const awayPlayers = (m.awayPlayers || []).flatMap(code => (KEY_PLAYERS[code] || []).slice(0,3));
+  const allPlayers = [...homePlayers, ...awayPlayers];
+
+  const avatarsHtml = allPlayers.map((p, i) => `
+    <div class="player-avatar-chip" style="animation-delay:${0.05+i*0.05}s">
+      <div class="av-circle" style="background:${p.col}22;color:${p.col};border:1.5px solid ${p.col}44;animation-delay:${i*0.06}s">
+        ${p.init}
+      </div>
+      <div>
+        <div class="av-name">${p.name}</div>
+        <div class="av-role">${p.role}</div>
+      </div>
+    </div>`).join('');
+
+  const playersRowHtml = allPlayers.length > 0 ? `
+    <div class="ah-players-row">
+      <span class="ah-players-label">KEY PLAYERS</span>
+      ${avatarsHtml}
+    </div>` : '';
+
+  const card = document.createElement('div');
+  card.className = `ah-card rec-${m.rec} spring-in`;
+  card.style.animationDelay = (idx * 0.06) + 's';
+
+  card.innerHTML = `
+    <div class="ah-card-header">
+      <div class="ah-stage-pill">${m.group?.replace('Group ','GRP-') || m.stage}</div>
+      <div class="ah-date-tag">${m.date}</div>
+      <div class="ah-matchup">
+        <div class="ah-team-block">
+          <span class="ah-flag">${m.homeFlag}</span>
+          <span class="ah-team-name">${m.home}</span>
+        </div>
+        <span class="ah-vs-sep">VS</span>
+        <div class="ah-team-block">
+          <span class="ah-flag">${m.awayFlag}</span>
+          <span class="ah-team-name">${m.away}</span>
+        </div>
+      </div>
+      <div class="ah-ml-tag">ML: ${m.homeML > 0 ? '+' : ''}${m.homeML} / ${m.awayML > 0 ? '+' : ''}${m.awayML}</div>
+    </div>
+
+    ${playersRowHtml}
+
+    <div class="ah-card-body">
+      <div class="ah-odds-panel">
+        <div class="ah-panel-label">Asian Handicap 让球盘</div>
+        <div class="ah-lines">
+          <div class="ah-line-box">
+            <div class="ah-line-team">${m.homeFlag} ${m.home}</div>
+            <div class="ah-handicap-val">${m.ah.homeLabel}</div>
+            <div class="ah-payout-val" style="color:${wH.col}">${m.ah.homePayout}</div>
+            <div class="ah-water-tag" style="color:${wH.col}">${wH.txt}</div>
           </div>
-          <div class="ah-vs">VS</div>
-          <div class="ah-team">
-            <span class="ah-team-flag">${m.awayFlag}</span>
-            <span class="ah-team-name">${m.away}</span>
+          <div class="ah-line-box">
+            <div class="ah-line-team">${m.awayFlag} ${m.away}</div>
+            <div class="ah-handicap-val">${m.ah.awayLabel}</div>
+            <div class="ah-payout-val" style="color:${wA.col}">${m.ah.awayPayout}</div>
+            <div class="ah-water-tag" style="color:${wA.col}">${wA.txt}</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-          <div class="ah-group-tag">${m.venue.split(' ').slice(-2).join(' ')}</div>
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--text3)">ML: <span style="color:var(--text2);font-weight:700">${m.homeML > 0 ? '+' : ''}${m.homeML}</span></div>
+        <div class="ah-edge-row">
+          <span class="ah-edge-label">SIM COVER ${m.simCoverAH}% / MKT ${m.marketCoverAH}%</span>
+          <div class="ah-edge-bar">
+            <div class="ah-edge-fill" style="width:${edgeBarW}%;background:${edgeColor}"></div>
+          </div>
+          <span class="ah-edge-pct" style="color:${edgeColor}">${m.edge >= 0 ? '+' : ''}${m.edge}%</span>
         </div>
       </div>
 
-      <div class="ah-card-body">
-        <div class="ah-line-panel">
-          <div class="ah-panel-label">让球盘 Asian Handicap</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-            <div style="padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius)">
-              <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em">${m.homeFlag} ${m.home}</div>
-              <div class="ah-handicap">${m.ah.homeLabel}</div>
-              <div class="ah-payout" style="color:${wL.col}">${m.ah.homePayout}</div>
-              <div class="ah-water" style="color:${wL.col}">${wL.txt}</div>
-            </div>
-            <div style="padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius)">
-              <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em">${m.awayFlag} ${m.away}</div>
-              <div class="ah-handicap">${m.ah.awayLabel}</div>
-              <div class="ah-payout" style="color:${wR.col}">${m.ah.awayPayout}</div>
-              <div class="ah-water" style="color:${wR.col}">${wR.txt}</div>
-            </div>
-          </div>
-          <div class="ah-prob-compare">
-            <span class="ah-mkt-pct">Sim cover:</span>
-            <div class="ah-prob-bar-mini"><div class="ah-prob-bar-fill" style="width:${m.simCoverAH}%;background:${edgeColor}"></div></div>
-            <span class="ah-sim-pct" style="color:${edgeColor}">${m.simCoverAH}%</span>
-            <span class="ah-mkt-pct">vs mkt ${m.marketCoverAH}%</span>
-            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;color:${edgeColor}">${edge > 0 ? '+' : ''}${edge}%</span>
-          </div>
-        </div>
+      <div class="ah-rec-panel">
+        <div class="ah-panel-label">Simulation Verdict</div>
+        <div class="ah-rec-badge" style="background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border}">${m.recLabel}</div>
+        <div class="ah-rec-notes">${m.notes}</div>
+        <div class="ah-rec-detail">💡 ${m.recDetail}</div>
+      </div>
+    </div>`;
 
-        <div class="ah-rec-panel">
-          <div class="ah-panel-label">Simulation Verdict</div>
-          <div class="ah-rec-badge" style="background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border}">${m.recLabel}</div>
-          <div class="ah-rec-notes">${m.notes}</div>
-          <div class="ah-rec-detail">💡 ${m.recDetail}</div>
-        </div>
-      </div>`;
-    el.appendChild(card);
+  return card;
+}
+
+// Scroll-triggered spring animations
+function setupScrollReveal() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.animationPlayState = 'running';
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.spring-in, .ah-sum-card').forEach(el => {
+    el.style.animationPlayState = 'paused';
+    obs.observe(el);
   });
-
-  if (list.length === 0) {
-    el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:15px;letter-spacing:.06em">No matches in this category</div>`;
-  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

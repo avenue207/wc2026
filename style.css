@@ -1593,158 +1593,235 @@ body {
 }
 
 /* ══════════════════════════════════════════════
-   ASIAN HANDICAP / ODDS SECTION
+   ASIAN HANDICAP SECTION — REMOTION-INSPIRED ANIMATIONS
 ══════════════════════════════════════════════ */
+
+/* Spring physics animation (Remotion spring curve) */
+@keyframes springReveal {
+  0%   { opacity:0; transform:translateY(28px) scale(0.94); }
+  55%  { opacity:1; transform:translateY(-5px) scale(1.02); }
+  75%  { transform:translateY(3px) scale(0.99); }
+  100% { transform:translateY(0) scale(1); }
+}
+@keyframes springPop {
+  0%   { transform:scale(0.5); opacity:0; }
+  60%  { transform:scale(1.08); opacity:1; }
+  80%  { transform:scale(0.96); }
+  100% { transform:scale(1); }
+}
+@keyframes slideRight {
+  from { transform:scaleX(0); transform-origin:left; }
+  to   { transform:scaleX(1); transform-origin:left; }
+}
+@keyframes countUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes avatarSpin {
+  from { transform:rotateY(90deg) scale(0.6); opacity:0; }
+  to   { transform:rotateY(0deg) scale(1); opacity:1; }
+}
+.spring-in {
+  animation: springReveal 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+/* AH header */
 .ah-header-bar {
-  display:flex; align-items:center; gap:12px; margin-bottom:20px;
-  padding:12px 16px; background:var(--card2);
+  display:flex; align-items:center; gap:10px; margin-bottom:18px;
+  padding:10px 16px; background:var(--card2);
   border:1px solid var(--border2); border-radius:var(--radius);
-  font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:.06em;
-  flex-wrap:wrap; gap:10px;
+  font-family:'Barlow Condensed',sans-serif; font-size:11px;
+  letter-spacing:.06em; flex-wrap:wrap;
 }
 .ah-source-badge {
   background:rgba(255,255,255,.05); border:1px solid var(--border);
   border-radius:6px; padding:3px 10px; color:var(--text2);
 }
-.ah-update-time { color:var(--text3); margin-left:auto; }
+.ah-update-time { color:var(--text3); margin-left:auto; font-size:10px; }
 
+/* Filter tabs */
 .ah-filter-row {
-  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;
+  display:flex; gap:6px; flex-wrap:wrap; margin-bottom:22px;
+  padding:12px 16px; background:var(--card);
+  border:1px solid var(--border); border-radius:var(--radius-lg);
 }
 .ah-filter-btn {
   font-family:'Barlow Condensed',sans-serif; font-weight:700;
   font-size:11px; letter-spacing:.08em; text-transform:uppercase;
   padding:6px 14px; border-radius:100px;
-  background:var(--card); border:1px solid var(--border);
-  color:var(--text3); cursor:pointer; transition:all .15s;
+  background:var(--bg); border:1px solid var(--border);
+  color:var(--text3); cursor:pointer; transition:all .2s;
 }
 .ah-filter-btn:hover { border-color:var(--border2); color:var(--text2); }
-.ah-filter-btn.active { background:rgba(232,168,32,.1); border-color:var(--gold); color:var(--gold); }
+.ah-filter-btn.active { background:rgba(232,168,32,.12); border-color:var(--gold); color:var(--gold); }
+.stage-divider {
+  font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:.16em;
+  color:var(--text3); padding:6px 0; margin:18px 0 10px;
+  border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px;
+}
+.stage-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
-.ah-grid { display:flex; flex-direction:column; gap:12px; }
-
-.ah-card {
+/* Summary strip */
+.ah-summary-strip {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:10px; margin-bottom:22px;
+}
+.ah-sum-card {
   background:var(--card); border:1px solid var(--border);
-  border-radius:var(--radius-lg); overflow:hidden;
-  transition:transform .2s, box-shadow .2s;
+  border-radius:var(--radius-lg); padding:14px; text-align:center;
+  animation:springReveal .5s cubic-bezier(0.34,1.56,0.64,1) both;
 }
-.ah-card:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,.3); }
-
-.ah-card-top {
-  padding:16px 20px 12px;
-  border-bottom:1px solid var(--border);
-  display:grid; grid-template-columns:auto 1fr auto;
-  align-items:center; gap:14px;
+.ah-sum-num {
+  font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:.02em; line-height:1;
 }
-.ah-date-badge {
-  font-family:'Barlow Condensed',sans-serif; font-weight:700;
-  font-size:10px; letter-spacing:.1em; color:var(--text3);
-  background:var(--bg3); border:1px solid var(--border);
-  border-radius:6px; padding:4px 8px; flex-shrink:0;
-  text-align:center;
-}
-.ah-teams {
-  display:flex; align-items:center; gap:10px;
-}
-.ah-team { display:flex; align-items:center; gap:6px; }
-.ah-team-flag { font-size:20px; line-height:1; }
-.ah-team-name {
-  font-family:'Barlow Condensed',sans-serif; font-weight:700;
-  font-size:14px; color:var(--text);
-}
-.ah-vs {
-  font-family:'Bebas Neue',sans-serif; font-size:12px;
-  color:var(--text3); letter-spacing:.06em;
-}
-.ah-group-tag {
+.ah-sum-label {
   font-family:'Barlow Condensed',sans-serif; font-size:10px;
+  font-weight:700; letter-spacing:.1em; color:var(--text3); margin-top:3px;
+}
+
+/* ── Main card ── */
+.ah-card {
+  background:var(--card); border-radius:var(--radius-xl);
+  overflow:hidden; transition:box-shadow .25s, transform .25s;
+  border-left:3px solid var(--border);
+  animation:springReveal .55s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.ah-card:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.35); }
+.ah-card.rec-strong { border-left-color:#22c55e; }
+.ah-card.rec-value  { border-left-color:#4ade80; }
+.ah-card.rec-slight { border-left-color:#facc15; }
+.ah-card.rec-avoid  { border-left-color:#f97316; }
+.ah-card.rec-neutral { border-left-color:var(--border2); }
+
+/* Card header */
+.ah-card-header {
+  padding:16px 20px 12px;
+  background:linear-gradient(135deg, var(--card2), var(--card));
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+}
+.ah-stage-pill {
+  font-family:'Barlow Condensed',sans-serif; font-size:9px;
+  font-weight:800; letter-spacing:.14em;
+  padding:3px 8px; border-radius:100px;
+  background:var(--bg); border:1px solid var(--border2);
+  color:var(--text3); flex-shrink:0;
+}
+.ah-date-tag {
+  font-family:'Barlow Condensed',sans-serif; font-size:11px;
+  color:var(--text3); flex-shrink:0;
+}
+.ah-matchup { display:flex; align-items:center; gap:12px; flex:1; }
+.ah-team-block { display:flex; align-items:center; gap:8px; }
+.ah-flag { font-size:22px; line-height:1; }
+.ah-team-name { font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:16px; color:var(--text); }
+.ah-vs-sep { font-family:'Bebas Neue',sans-serif; font-size:12px; color:var(--text3); letter-spacing:.08em; padding:0 4px; }
+.ah-ml-tag {
+  font-family:'Barlow Condensed',sans-serif; font-size:11px; color:var(--text2);
+  background:var(--bg3); border:1px solid var(--border); border-radius:6px;
+  padding:2px 8px; margin-left:auto; flex-shrink:0;
+}
+
+/* Player avatars row */
+.ah-players-row {
+  display:flex; gap:6px; padding:10px 20px;
+  background:rgba(255,255,255,.015); border-bottom:1px solid var(--border);
+  flex-wrap:wrap; align-items:center;
+}
+.ah-players-label {
+  font-family:'Barlow Condensed',sans-serif; font-size:9px;
   font-weight:700; letter-spacing:.1em; color:var(--text3);
-  padding:2px 8px; background:var(--bg); border:1px solid var(--border);
-  border-radius:4px;
+  margin-right:4px; flex-shrink:0;
 }
-
-.ah-card-body { display:grid; grid-template-columns:1fr 1fr; gap:0; }
-
-.ah-line-panel {
-  padding:14px 20px;
-  border-right:1px solid var(--border);
+.player-avatar-chip {
+  display:flex; align-items:center; gap:6px;
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:100px; padding:3px 10px 3px 3px;
+  transition:all .2s; cursor:default;
 }
-.ah-line-panel:last-child { border-right:none; }
+.player-avatar-chip:hover {
+  border-color:var(--border2); transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+}
+.av-circle {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Barlow Condensed',sans-serif; font-weight:800;
+  font-size:10px; letter-spacing:.04em; flex-shrink:0;
+  animation: avatarSpin 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  position:relative;
+}
+.av-circle::after {
+  content:''; position:absolute; inset:-2px; border-radius:50%;
+  border:1px solid currentColor; opacity:.3;
+}
+.av-name {
+  font-family:'Barlow Condensed',sans-serif; font-size:11px;
+  font-weight:600; color:var(--text2); white-space:nowrap;
+}
+.av-role {
+  font-size:9px; color:var(--text3); letter-spacing:.06em;
+  font-family:'Barlow Condensed',sans-serif; font-weight:600;
+}
+.av-sep { width:1px; height:16px; background:var(--border2); flex-shrink:0; margin:0 4px; }
+
+/* Card body grid */
+.ah-card-body { display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid var(--border); }
+.ah-odds-panel { padding:16px 20px; border-right:1px solid var(--border); }
+.ah-rec-panel  { padding:16px 20px; }
 .ah-panel-label {
   font-family:'Barlow Condensed',sans-serif; font-size:10px;
-  font-weight:700; letter-spacing:.12em; color:var(--text3);
-  margin-bottom:10px; text-transform:uppercase;
-}
-.ah-line-row {
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  margin-bottom:8px;
-}
-.ah-handicap {
-  font-family:'Bebas Neue',sans-serif; font-size:20px;
-  letter-spacing:.02em; color:var(--text);
-}
-.ah-payout {
-  font-family:'Barlow Condensed',sans-serif; font-weight:800;
-  font-size:18px; letter-spacing:.02em;
-}
-.ah-water {
-  font-family:'Barlow Condensed',sans-serif; font-size:10px;
-  font-weight:600; letter-spacing:.06em; margin-top:2px;
+  font-weight:800; letter-spacing:.14em; color:var(--text3);
+  margin-bottom:12px; text-transform:uppercase;
 }
 
-.ah-prob-compare {
-  display:flex; align-items:center; gap:6px;
-  margin-top:10px; padding-top:10px;
-  border-top:1px solid var(--border);
-  font-family:'Barlow Condensed',sans-serif; font-size:11px;
+/* AH line boxes */
+.ah-lines { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.ah-line-box {
+  padding:10px 12px; border-radius:var(--radius);
+  background:var(--bg); border:1px solid var(--border);
 }
-.ah-prob-bar-mini {
-  flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden;
-}
-.ah-prob-bar-fill { height:100%; border-radius:2px; }
-.ah-sim-pct { font-weight:700; font-size:13px; }
-.ah-mkt-pct { color:var(--text3); font-size:11px; }
+.ah-line-team { font-size:9px; color:var(--text3); margin-bottom:4px; font-family:'Barlow Condensed',sans-serif; letter-spacing:.05em; }
+.ah-handicap-val { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:.02em; color:var(--text); line-height:1; }
+.ah-payout-val { font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:17px; margin-top:2px; }
+.ah-water-tag { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:700; letter-spacing:.06em; margin-top:3px; }
 
-.ah-rec-panel { padding:14px 20px; }
+/* Edge bar */
+.ah-edge-row {
+  display:flex; align-items:center; gap:8px;
+  padding-top:10px; border-top:1px solid var(--border);
+}
+.ah-edge-label { font-family:'Barlow Condensed',sans-serif; font-size:10px; color:var(--text3); letter-spacing:.06em; white-space:nowrap; }
+.ah-edge-bar { flex:1; height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+.ah-edge-fill { height:100%; border-radius:3px; animation:slideRight .8s cubic-bezier(0.34,1.56,0.64,1) both; }
+.ah-edge-pct { font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:13px; white-space:nowrap; }
+
+/* Rec panel */
 .ah-rec-badge {
   font-family:'Barlow Condensed',sans-serif; font-weight:800;
-  font-size:12px; letter-spacing:.08em;
-  padding:5px 12px; border-radius:6px; margin-bottom:10px;
-  display:inline-block;
+  font-size:11px; letter-spacing:.08em;
+  padding:5px 12px; border-radius:6px;
+  display:inline-block; margin-bottom:10px;
+  animation:springPop .4s cubic-bezier(0.34,1.56,0.64,1) .1s both;
 }
-.ah-rec-notes { font-size:12px; color:var(--text2); line-height:1.6; margin-bottom:8px; }
+.ah-rec-notes { font-size:12px; color:var(--text2); line-height:1.65; margin-bottom:8px; }
 .ah-rec-detail {
   font-size:11px; color:var(--text3); line-height:1.55;
   padding:8px 10px; background:rgba(255,255,255,.02);
   border-radius:6px; border-left:2px solid var(--border2);
 }
 
-.ah-summary-strip {
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:10px; margin-bottom:24px;
-}
-.ah-sum-card {
-  background:var(--card); border:1px solid var(--border);
-  border-radius:var(--radius); padding:12px 14px; text-align:center;
-}
-.ah-sum-num {
-  font-family:'Bebas Neue',sans-serif; font-size:32px;
-  letter-spacing:.02em; line-height:1;
-}
-.ah-sum-label {
-  font-family:'Barlow Condensed',sans-serif; font-size:10px;
-  font-weight:600; letter-spacing:.1em; color:var(--text3);
-  margin-top:2px;
-}
-
+/* Disclaimer */
 .ah-disclaimer {
   margin-top:20px; padding:12px 16px;
   background:rgba(255,255,255,.02); border:1px solid var(--border);
   border-radius:var(--radius); font-size:11px; color:var(--text3); line-height:1.7;
 }
 
-@media(max-width:600px){
+.ah-grid { display:flex; flex-direction:column; gap:12px; }
+
+@media(max-width:640px){
   .ah-card-body { grid-template-columns:1fr; }
-  .ah-line-panel { border-right:none; border-bottom:1px solid var(--border); }
-  .ah-teams { flex-wrap:wrap; }
+  .ah-odds-panel { border-right:none; border-bottom:1px solid var(--border); }
 }
+

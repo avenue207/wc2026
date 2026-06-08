@@ -43,7 +43,7 @@
   <nav class="sticky-nav" id="stickyNav">
     <div class="nav-inner">
       <a href="#squads"   class="nav-link active" onclick="setActive(this)">Squad Ratings</a>
-      <a href="#odds" class="nav-link" onclick="setActive(this)">让球盘 Odds</a>
+      <a href="#odds" class="nav-link" onclick="setActive(this)">AH Odds</a>
       <a href="#h2h"      class="nav-link"         onclick="setActive(this)">Head-to-Head</a>
       <a href="#bracket"  class="nav-link"         onclick="setActive(this)">Bracket</a>
       <a href="#results"  class="nav-link" id="resultsNavLink" onclick="setActive(this)">
@@ -73,7 +73,7 @@
       <div class="section-header">
         <div class="section-number">02</div>
         <div>
-          <h2 class="section-title">让球盘 · Asian Handicap Odds</h2>
+          <h2 class="section-title">Asian Handicap Odds</h2>
           <p class="section-desc">Live 让球盘 lines + 水位 (payout rates) from Bet365, Pinnacle & William Hill — cross-referenced against 100,000-run simulation to find value bets. Updated pre-tournament Jun 8 2026.</p>
         </div>
       </div>
@@ -90,10 +90,11 @@
 
       <div class="ah-filter-row">
         <button class="ah-filter-btn active" data-filter="all">All Matches</button>
-        <button class="ah-filter-btn" data-filter="value">🔥 Strong + Value</button>
+        <button class="ah-filter-btn" data-filter="picks">🔥 Best Picks</button>
+        <button class="ah-filter-btn" data-filter="strong">💎 Strong Value</button>
+        <button class="ah-filter-btn" data-filter="value">✅ Good Value</button>
         <button class="ah-filter-btn" data-filter="slight">⚠️ Slight Edge</button>
         <button class="ah-filter-btn" data-filter="avoid">❌ Avoid</button>
-        <button class="ah-filter-btn" data-filter="neutral">— Skip</button>
       </div>
 
       <div class="ah-grid" id="ahGrid"></div>
