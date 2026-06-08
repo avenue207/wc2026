@@ -1591,3 +1591,160 @@ body {
   .final-verdict-banner { padding: 20px; }
   .fvb-duels { flex-direction: column; }
 }
+
+/* ══════════════════════════════════════════════
+   ASIAN HANDICAP / ODDS SECTION
+══════════════════════════════════════════════ */
+.ah-header-bar {
+  display:flex; align-items:center; gap:12px; margin-bottom:20px;
+  padding:12px 16px; background:var(--card2);
+  border:1px solid var(--border2); border-radius:var(--radius);
+  font-family:'Barlow Condensed',sans-serif; font-size:11px; letter-spacing:.06em;
+  flex-wrap:wrap; gap:10px;
+}
+.ah-source-badge {
+  background:rgba(255,255,255,.05); border:1px solid var(--border);
+  border-radius:6px; padding:3px 10px; color:var(--text2);
+}
+.ah-update-time { color:var(--text3); margin-left:auto; }
+
+.ah-filter-row {
+  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;
+}
+.ah-filter-btn {
+  font-family:'Barlow Condensed',sans-serif; font-weight:700;
+  font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  padding:6px 14px; border-radius:100px;
+  background:var(--card); border:1px solid var(--border);
+  color:var(--text3); cursor:pointer; transition:all .15s;
+}
+.ah-filter-btn:hover { border-color:var(--border2); color:var(--text2); }
+.ah-filter-btn.active { background:rgba(232,168,32,.1); border-color:var(--gold); color:var(--gold); }
+
+.ah-grid { display:flex; flex-direction:column; gap:12px; }
+
+.ah-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius-lg); overflow:hidden;
+  transition:transform .2s, box-shadow .2s;
+}
+.ah-card:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,.3); }
+
+.ah-card-top {
+  padding:16px 20px 12px;
+  border-bottom:1px solid var(--border);
+  display:grid; grid-template-columns:auto 1fr auto;
+  align-items:center; gap:14px;
+}
+.ah-date-badge {
+  font-family:'Barlow Condensed',sans-serif; font-weight:700;
+  font-size:10px; letter-spacing:.1em; color:var(--text3);
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:6px; padding:4px 8px; flex-shrink:0;
+  text-align:center;
+}
+.ah-teams {
+  display:flex; align-items:center; gap:10px;
+}
+.ah-team { display:flex; align-items:center; gap:6px; }
+.ah-team-flag { font-size:20px; line-height:1; }
+.ah-team-name {
+  font-family:'Barlow Condensed',sans-serif; font-weight:700;
+  font-size:14px; color:var(--text);
+}
+.ah-vs {
+  font-family:'Bebas Neue',sans-serif; font-size:12px;
+  color:var(--text3); letter-spacing:.06em;
+}
+.ah-group-tag {
+  font-family:'Barlow Condensed',sans-serif; font-size:10px;
+  font-weight:700; letter-spacing:.1em; color:var(--text3);
+  padding:2px 8px; background:var(--bg); border:1px solid var(--border);
+  border-radius:4px;
+}
+
+.ah-card-body { display:grid; grid-template-columns:1fr 1fr; gap:0; }
+
+.ah-line-panel {
+  padding:14px 20px;
+  border-right:1px solid var(--border);
+}
+.ah-line-panel:last-child { border-right:none; }
+.ah-panel-label {
+  font-family:'Barlow Condensed',sans-serif; font-size:10px;
+  font-weight:700; letter-spacing:.12em; color:var(--text3);
+  margin-bottom:10px; text-transform:uppercase;
+}
+.ah-line-row {
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  margin-bottom:8px;
+}
+.ah-handicap {
+  font-family:'Bebas Neue',sans-serif; font-size:20px;
+  letter-spacing:.02em; color:var(--text);
+}
+.ah-payout {
+  font-family:'Barlow Condensed',sans-serif; font-weight:800;
+  font-size:18px; letter-spacing:.02em;
+}
+.ah-water {
+  font-family:'Barlow Condensed',sans-serif; font-size:10px;
+  font-weight:600; letter-spacing:.06em; margin-top:2px;
+}
+
+.ah-prob-compare {
+  display:flex; align-items:center; gap:6px;
+  margin-top:10px; padding-top:10px;
+  border-top:1px solid var(--border);
+  font-family:'Barlow Condensed',sans-serif; font-size:11px;
+}
+.ah-prob-bar-mini {
+  flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden;
+}
+.ah-prob-bar-fill { height:100%; border-radius:2px; }
+.ah-sim-pct { font-weight:700; font-size:13px; }
+.ah-mkt-pct { color:var(--text3); font-size:11px; }
+
+.ah-rec-panel { padding:14px 20px; }
+.ah-rec-badge {
+  font-family:'Barlow Condensed',sans-serif; font-weight:800;
+  font-size:12px; letter-spacing:.08em;
+  padding:5px 12px; border-radius:6px; margin-bottom:10px;
+  display:inline-block;
+}
+.ah-rec-notes { font-size:12px; color:var(--text2); line-height:1.6; margin-bottom:8px; }
+.ah-rec-detail {
+  font-size:11px; color:var(--text3); line-height:1.55;
+  padding:8px 10px; background:rgba(255,255,255,.02);
+  border-radius:6px; border-left:2px solid var(--border2);
+}
+
+.ah-summary-strip {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px; margin-bottom:24px;
+}
+.ah-sum-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:12px 14px; text-align:center;
+}
+.ah-sum-num {
+  font-family:'Bebas Neue',sans-serif; font-size:32px;
+  letter-spacing:.02em; line-height:1;
+}
+.ah-sum-label {
+  font-family:'Barlow Condensed',sans-serif; font-size:10px;
+  font-weight:600; letter-spacing:.1em; color:var(--text3);
+  margin-top:2px;
+}
+
+.ah-disclaimer {
+  margin-top:20px; padding:12px 16px;
+  background:rgba(255,255,255,.02); border:1px solid var(--border);
+  border-radius:var(--radius); font-size:11px; color:var(--text3); line-height:1.7;
+}
+
+@media(max-width:600px){
+  .ah-card-body { grid-template-columns:1fr; }
+  .ah-line-panel { border-right:none; border-bottom:1px solid var(--border); }
+  .ah-teams { flex-wrap:wrap; }
+}

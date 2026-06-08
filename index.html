@@ -43,6 +43,7 @@
   <nav class="sticky-nav" id="stickyNav">
     <div class="nav-inner">
       <a href="#squads"   class="nav-link active" onclick="setActive(this)">Squad Ratings</a>
+      <a href="#odds" class="nav-link" onclick="setActive(this)">让球盘 Odds</a>
       <a href="#h2h"      class="nav-link"         onclick="setActive(this)">Head-to-Head</a>
       <a href="#bracket"  class="nav-link"         onclick="setActive(this)">Bracket</a>
       <a href="#results"  class="nav-link" id="resultsNavLink" onclick="setActive(this)">
@@ -66,10 +67,46 @@
       <div class="teams-grid" id="teamsGrid"></div>
     </section>
 
+
+    <!-- ASIAN HANDICAP ODDS -->
+    <section id="odds" class="section section-alt">
+      <div class="section-header">
+        <div class="section-number">02</div>
+        <div>
+          <h2 class="section-title">让球盘 · Asian Handicap Odds</h2>
+          <p class="section-desc">Live 让球盘 lines + 水位 (payout rates) from Bet365, Pinnacle & William Hill — cross-referenced against 100,000-run simulation to find value bets. Updated pre-tournament Jun 8 2026.</p>
+        </div>
+      </div>
+
+      <div class="ah-header-bar">
+        <span class="ah-source-badge">📊 Bet365</span>
+        <span class="ah-source-badge">📊 William Hill</span>
+        <span class="ah-source-badge">📊 FanDuel</span>
+        <span class="ah-source-badge">📊 Oddschecker</span>
+        <span class="ah-update-time">⟳ Updated Jun 8 2026 · 12 group stage matches</span>
+      </div>
+
+      <div id="ahSummary" class="ah-summary-strip"></div>
+
+      <div class="ah-filter-row">
+        <button class="ah-filter-btn active" data-filter="all">All Matches</button>
+        <button class="ah-filter-btn" data-filter="value">🔥 Strong + Value</button>
+        <button class="ah-filter-btn" data-filter="slight">⚠️ Slight Edge</button>
+        <button class="ah-filter-btn" data-filter="avoid">❌ Avoid</button>
+        <button class="ah-filter-btn" data-filter="neutral">— Skip</button>
+      </div>
+
+      <div class="ah-grid" id="ahGrid"></div>
+
+      <div class="ah-disclaimer">
+        ⚠️ <strong>Disclaimer:</strong> All odds and handicap lines are sourced from public bookmakers and are subject to change before kickoff. 水位 (payout rates) shown are pre-match estimates. Asian Handicap "cover probability" is derived from the simulation model and carries model uncertainty. This analysis is for informational and entertainment purposes only. Bet responsibly. Never bet more than you can afford to lose.
+      </div>
+    </section>
+
     <!-- HEAD TO HEAD -->
     <section id="h2h" class="section section-alt">
       <div class="section-header">
-        <div class="section-number">02</div>
+        <div class="section-number">03</div>
         <div>
           <h2 class="section-title">Head-to-Head Analysis</h2>
           <p class="section-desc">Select any two teams to see a full statistical breakdown and simulated win probability.</p>
@@ -103,7 +140,7 @@
     <!-- BRACKET -->
     <section id="bracket" class="section">
       <div class="section-header">
-        <div class="section-number">03</div>
+        <div class="section-number">04</div>
         <div>
           <h2 class="section-title">Bracket Paths</h2>
           <p class="section-desc">Realistic 2026 draw seedings. Base win % from strength differential before simulation noise.</p>
@@ -129,7 +166,7 @@
     <!-- RESULTS -->
     <section id="results" class="section section-alt">
       <div class="section-header">
-        <div class="section-number">04</div>
+        <div class="section-number">05</div>
         <div>
           <h2 class="section-title">Simulation Results</h2>
           <p class="section-desc">Semi-final qualification probability across 100,000 tournament runs.</p>
@@ -153,7 +190,7 @@
     <!-- FINAL -->
     <section id="final" class="section">
       <div class="section-header">
-        <div class="section-number">05</div>
+        <div class="section-number">06</div>
         <div>
           <h2 class="section-title">Final & Champion</h2>
           <p class="section-desc">The simulation's predicted World Cup Final and trophy winner.</p>
@@ -186,6 +223,7 @@
     </div>
   </footer>
 
+  <script src="odds.js"></script>
   <script src="data.js"></script>
   <script src="sim.js"></script>
   <script src="ui.js"></script>
