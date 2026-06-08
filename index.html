@@ -21,7 +21,6 @@
     </div>
     <nav class="bw-header-nav">
       <a href="#matches" class="bw-hn-link" onclick="switchTab('matches',this)">Matches</a>
-      <a href="#odds"    class="bw-hn-link" onclick="switchTab('odds',this)">AH Odds</a>
       <a href="#scorer"  class="bw-hn-link" onclick="switchTab('scorer',this)">Golden Boot</a>
       <a href="#bracket" class="bw-hn-link" onclick="switchTab('bracket',this)">Bracket</a>
       <a href="#sim"     class="bw-hn-link" onclick="switchTab('sim',this)">Simulation</a>
@@ -35,15 +34,10 @@
 <!-- ═══ SPORT SUB-NAV ═══ -->
 <div class="bw-subnav">
   <div class="bw-subnav-inner">
-    <span class="bw-breadcrumb">Football</span>
-    <span class="bw-bc-sep">›</span>
-    <span class="bw-breadcrumb">World Cup 2026</span>
-    <span class="bw-bc-sep">›</span>
-    <span class="bw-breadcrumb active" id="breadcrumbActive">Matches</span>
     <div class="bw-subnav-pills">
       <button class="bw-pill active" onclick="switchTab('matches',this)" data-tab="matches">Upcoming Matches</button>
       <button class="bw-pill" onclick="switchTab('odds',this)"   data-tab="odds">AH Odds</button>
-      <button class="bw-pill" onclick="switchTab('scorer',this)" data-tab="scorer">🏅 Golden Boot</button>
+      <button class="bw-pill" onclick="switchTab('scorer',this)" data-tab="scorer">Golden Boot</button>
       <button class="bw-pill" onclick="switchTab('bracket',this)" data-tab="bracket">Bracket</button>
       <button class="bw-pill" onclick="switchTab('sim',this)"    data-tab="sim" id="simPill">
         Simulation <span class="bw-pill-badge" id="simBadge" style="display:none">✓</span>
