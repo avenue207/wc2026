@@ -43,11 +43,7 @@ function filterStage(stage) {
 }
 
 // ── TEAM OVR ──
-function overallRating(id) {
-  if (!TEAMS[id]) return 75;
-  const s = TEAMS[id].stats;
-  return Math.round(s.atk*.22+s.mid*.20+s.def*.20+s.gk*.10+s.form*.15+s.exp*.08+s.depth*.05);
-}
+// overallRating() defined in data.js
 
 // ── SIM engine refs ──
 function baseWinProb(a, b) {
@@ -409,11 +405,7 @@ function darken(hex, pct) {
 //  H2H
 // ═══════════════════════════════════════════════
 const ABBR = {FRA:"FRA",ESP:"ESP",ARG:"ARG",ENG:"ENG",BRA:"BRA",POR:"POR",GER:"GER",MAR:"MAR",USA:"USA",NED:"NED",COL:"COL",URU:"URU",JPN:"JPN",BEL:"BEL",CRO:"CRO",SEN:"SEN"};
-const STAT_META = {
-  atk:{label:"ATTACK",color:"#f97316"},mid:{label:"MIDFIELD",color:"#8b5cf6"},
-  def:{label:"DEFENSE",color:"#0ea5e9"},gk:{label:"GK",color:"#eab308"},
-  form:{label:"FORM",color:"#22c55e"},depth:{label:"DEPTH",color:"#3b82f6"},exp:{label:"EXP",color:"#ec4899"}
-};
+// STAT_META defined in data.js
 
 function renderH2HSelectors() {
   ["A","B"].forEach(side => {
