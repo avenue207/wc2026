@@ -430,3 +430,23 @@ const WDW_ODDS = {
   SF_1:[1.95,3.40,4.00], SF_2:[1.75,3.50,4.60],
   F1:[1.95,3.40,4.10],
 };
+
+// ═══════════════════════════════════════════════
+//  PLAYER PHOTOS — Wikipedia Commons
+//  Browser fetches these directly (CORS-safe)
+//  Falls back to SVG avatar if image fails
+// ═══════════════════════════════════════════════
+const PLAYER_PHOTOS = {
+  "Kylian Mbappé":    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Kylian_Mbapp%C3%A9_2019-10-11_1.jpg/320px-Kylian_Mbapp%C3%A9_2019-10-11_1.jpg",
+  "Harry Kane":        "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Harry_Kane_2023.jpg/320px-Harry_Kane_2023.jpg",
+  "Erling Haaland":    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Erling_Haaland_2023.jpg/320px-Erling_Haaland_2023.jpg",
+  "Lionel Messi":      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Lionel_Messi_20180626_%28cropped%29.jpg/320px-Lionel_Messi_20180626_%28cropped%29.jpg",
+  "Lamine Yamal":      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Lamine_Yamal_2024.jpg/320px-Lamine_Yamal_2024.jpg",
+  "Mikel Oyarzabal":   "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Mikel_Oyarzabal_2022_%28cropped%29.jpg/320px-Mikel_Oyarzabal_2022_%28cropped%29.jpg",
+  "Cristiano Ronaldo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Cristiano_Ronaldo_2019_%28cropped%29.jpg/320px-Cristiano_Ronaldo_2019_%28cropped%29.jpg",
+  "Vinícius Jr.":      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Vin%C3%ADcius_J%C3%BAnior_2024_%28cropped%29.jpg/320px-Vin%C3%ADcius_J%C3%BAnior_2024_%28cropped%29.jpg",
+  "Lautaro Martínez":  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Lautaro_Mart%C3%ADnez_2023.jpg/320px-Lautaro_Mart%C3%ADnez_2023.jpg",
+  "Bukayo Saka":       "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Bukayo_Saka_2022_%28cropped%29.jpg/320px-Bukayo_Saka_2022_%28cropped%29.jpg",
+  "Cody Gakpo":        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Cody_Gakpo_2023.jpg/320px-Cody_Gakpo_2023.jpg",
+  "Rafael Leão":       "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Rafael_Le%C3%A3o_2023.jpg/320px-Rafael_Le%C3%A3o_2023.jpg",
+};

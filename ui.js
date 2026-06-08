@@ -292,6 +292,7 @@ function renderScorer() {
       <div class="bw-player-face">
         ${buildPlayerSVG(p)}
         <div class="bw-rank-num">${p.rank}</div>
+        <div class="bw-photo-flag-badge"><span class="pf-flag">${p.flag}</span><span class="pf-name">${p.team}</span></div>
         ${i < 2 ? `<div class="bw-top-badge">FAVOURITE</div>` : ""}
       </div>
       <div class="bw-scorer-info">
@@ -335,57 +336,52 @@ function renderScorer() {
 
 // ── PLAYER SVG AVATAR ──
 function buildPlayerSVG(p) {
-  const gradId = `g${p.rank}`;
-  const c1 = p.col1, c2 = p.col2;
-  // Skin tone shades
-  const skin = "#f0c8a0";
-  const hair = "#2a1a0a";
+  const photoUrl = (typeof PLAYER_PHOTOS !== "undefined") ? PLAYER_PHOTOS[p.name] || "" : "";
+  const svgFallback = buildSVGAvatar(p);
 
-  return `<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" class="bw-player-svg" aria-label="${p.name} player avatar">
+  if (photoUrl) {
+    // Real photo with SVG fallback on error
+    return `<div class="bw-player-photo-wrap">
+      <img
+        src="${photoUrl}"
+        alt="${p.name}"
+        class="bw-player-photo"
+        crossorigin="anonymous"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+        onload="this.style.display='block';this.nextElementSibling.style.display='none'"
+      />
+      <div class="bw-player-svg-fallback" style="display:none">${svgFallback}</div>
+    </div>`;
+  }
+  return svgFallback;
+}
+
+function buildSVGAvatar(p) {
+  const gradId = "g" + p.rank;
+  const c1 = p.col1, c2 = p.col2;
+  const skin = "#f0c8a0", hair = "#2a1a0a";
+  return `<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" class="bw-player-svg" aria-hidden="true">
     <defs>
       <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="${c1}"/>
         <stop offset="100%" stop-color="${darken(c1,40)}"/>
       </linearGradient>
-      <pattern id="stripe${p.rank}" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-        <rect width="10" height="20" fill="rgba(255,255,255,0.04)"/>
-      </pattern>
-      <clipPath id="clip${p.rank}">
-        <rect width="200" height="140"/>
-      </clipPath>
     </defs>
-    <!-- Background -->
     <rect width="200" height="140" fill="url(#${gradId})"/>
-    <rect width="200" height="140" fill="url(#stripe${p.rank})"/>
-    <!-- Pitch pattern top -->
-    <circle cx="100" cy="-20" r="70" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-    <!-- Jersey body (torso) -->
-    <path d="M60 140 L60 88 Q65 82 75 80 L88 77 L100 74 L112 77 L125 80 Q135 82 140 88 L140 140 Z" 
-          fill="${c1}" stroke="${c2}" stroke-width="2"/>
-    <!-- Jersey collar -->
+    <path d="M60 140 L60 88 Q65 82 75 80 L88 77 L100 74 L112 77 L125 80 Q135 82 140 88 L140 140 Z" fill="${c1}" stroke="${c2}" stroke-width="2"/>
     <path d="M88 77 Q100 83 112 77 Q108 68 100 67 Q92 68 88 77Z" fill="${c2}"/>
-    <!-- Jersey number -->
     <text x="100" y="118" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="24" fill="rgba(255,255,255,0.9)" letter-spacing="2">${p.jersey}</text>
-    <!-- Neck -->
     <rect x="93" y="60" width="14" height="12" rx="7" fill="${skin}"/>
-    <!-- Head -->
     <ellipse cx="100" cy="52" rx="20" ry="22" fill="${skin}"/>
-    <!-- Hair -->
     <path d="M80 46 Q82 28 100 28 Q118 28 120 46 Q112 38 100 37 Q88 38 80 46Z" fill="${hair}"/>
-    <!-- Eyes -->
     <ellipse cx="93" cy="50" rx="3" ry="2.5" fill="#1a1a1a"/>
     <ellipse cx="107" cy="50" rx="3" ry="2.5" fill="#1a1a1a"/>
     <circle cx="94" cy="49" r="1" fill="white" opacity="0.7"/>
     <circle cx="108" cy="49" r="1" fill="white" opacity="0.7"/>
-    <!-- Nose -->
     <path d="M98 53 Q100 57 102 53" fill="none" stroke="${darken(skin,30)}" stroke-width="1" stroke-linecap="round"/>
-    <!-- Mouth - slight smile -->
     <path d="M95 59 Q100 63 105 59" fill="none" stroke="${darken(skin,40)}" stroke-width="1.2" stroke-linecap="round"/>
-    <!-- Left arm -->
     <path d="M60 90 Q48 95 44 108 L50 112 Q56 100 62 96Z" fill="${c1}" stroke="${c2}" stroke-width="1.5"/>
-    <!-- Right arm -->
     <path d="M140 90 Q152 95 156 108 L150 112 Q144 100 138 96Z" fill="${c1}" stroke="${c2}" stroke-width="1.5"/>
-    <!-- Country flag strip bottom -->
     <rect x="0" y="124" width="200" height="16" fill="rgba(0,0,0,0.35)"/>
     <text x="100" y="136" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="10" font-weight="600" fill="rgba(255,255,255,0.85)" letter-spacing="0.5">${p.flag}  ${p.team.toUpperCase()}</text>
   </svg>`;
