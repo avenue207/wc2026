@@ -1,92 +1,430 @@
+
 // ═══════════════════════════════════════════════
-//  UI — Render all sections
+//  UI.JS — BETWAY-STYLE COMPLETE RENDERER
 // ═══════════════════════════════════════════════
 
-let selectedA = 'FRA';
-let selectedB = 'ESP';
+let selectedA = "FRA", selectedB = "ESP";
+let activeTab = "matches";
 
-document.addEventListener('DOMContentLoaded', () => {
-  renderTeams();
-  renderBracket();
+document.addEventListener("DOMContentLoaded", () => {
+  renderMatches();
+  renderAHTable("all");
+  renderScorer();
   renderH2HSelectors();
   renderH2H(selectedA, selectedB);
+  renderBracket();
 });
 
-// ─── NAV ───
-function setActive(el) {
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  el.classList.add('active');
+// ── TAB SWITCHING ──
+function switchTab(tab, el) {
+  activeTab = tab;
+  document.querySelectorAll(".bw-tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("tab-" + tab)?.classList.add("active");
+  document.querySelectorAll(".bw-pill").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".bw-hn-link").forEach(p => p.classList.remove("active"));
+  if (el) {
+    el.classList.add("active");
+    // sync pills and header links
+    const dataTab = el.dataset?.tab || tab;
+    document.querySelectorAll(`[data-tab="${dataTab}"]`).forEach(p => p.classList.add("active"));
+  }
+  const labels = {matches:"Matches",odds:"AH Odds",scorer:"Golden Boot",bracket:"Bracket",sim:"Simulation"};
+  const bc = document.getElementById("breadcrumbActive");
+  if (bc) bc.textContent = labels[tab] || tab;
 }
-const sectionIds = ['squads','h2h','bracket','results','final'];
-const navLinks   = document.querySelectorAll('.nav-link');
-const observer   = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
-    }
-  });
-}, { threshold: 0.25 });
-document.addEventListener('DOMContentLoaded', () => {
-  sectionIds.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
-});
+
+// ── STAGE FILTER ──
+let stageFilter = "all";
+function filterStage(stage) {
+  stageFilter = stage;
+  renderMatches();
+  document.querySelectorAll(".bw-sb-link").forEach(l => l.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+// ── TEAM OVR ──
+function overallRating(id) {
+  if (!TEAMS[id]) return 75;
+  const s = TEAMS[id].stats;
+  return Math.round(s.atk*.22+s.mid*.20+s.def*.20+s.gk*.10+s.form*.15+s.exp*.08+s.depth*.05);
+}
+
+// ── SIM engine refs ──
+function baseWinProb(a, b) {
+  if (!TEAMS[a] || !TEAMS[b]) return 0.5;
+  const sa = TEAMS[a].stats, sb = TEAMS[b].stats;
+  const offA = sa.atk*.55+sa.mid*.45, defB = sb.def*.55+sb.gk*.45;
+  const offB = sb.atk*.55+sb.mid*.45, defA = sa.def*.55+sa.gk*.45;
+  const nA = (offA-defB)+(sa.form-sb.form)*.25+(sa.exp-sb.exp)*.15+(sa.depth-sb.depth)*.10;
+  const nB = (offB-defA)+(sb.form-sa.form)*.25+(sb.exp-sa.exp)*.15+(sb.depth-sa.depth)*.10;
+  return 1/(1+Math.exp(-(nA-nB)*.068));
+}
 
 // ═══════════════════════════════════════════════
-//  TEAMS GRID
+//  MATCH LIST
 // ═══════════════════════════════════════════════
-function renderTeams() {
-  const grid = document.getElementById('teamsGrid');
-  if (!grid) return;
-  Object.keys(TEAMS).forEach((id, idx) => {
-    const t   = TEAMS[id];
-    const ovr = overallRating(id);
-    const card = document.createElement('div');
-    card.className = 'team-card fade-in';
-    card.style.animationDelay = (idx * 0.04) + 's';
-    card.title = 'Click to analyse in Head-to-Head';
-    card.onclick = () => {
-      if (selectedA === id) { /* already A */ }
-      else if (selectedB === id) { selectedA = id; }
-      else { selectedA = id; }
-      refreshSelectors();
-      renderH2H(selectedA, selectedB);
-      document.getElementById('h2h').scrollIntoView({ behavior:'smooth', block:'start' });
-    };
-    const statBars = Object.entries(STAT_META).map(([key, meta]) => {
-      const val = t.stats[key];
-      return `<div class="stat-row">
-        <span class="stat-key" style="color:${meta.color}">${meta.label}</span>
-        <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${val}%;background:${meta.color}"></div></div>
-        <span class="stat-val" style="color:${meta.color}">${val}</span>
-      </div>`;
-    }).join('');
-    const chips = t.players.map(p => `<span class="player-chip">${p}</span>`).join('');
-    card.innerHTML = `
-      <div class="team-card-top">
-        <span class="team-flag">${t.flag}</span>
-        <div><div class="team-name">${t.name}</div><div class="team-record">${t.record}</div></div>
-        <div class="team-ovr"><div class="ovr-num">${ovr}</div><div class="ovr-label">OVR</div></div>
+const STAGE_NAMES = {GRP:"Group Stage",R32:"Round of 32",R16:"Round of 16",QF:"Quarter-Finals",SF:"Semi-Finals",F:"Final"};
+
+function renderMatches() {
+  const el = document.getElementById("matchList");
+  if (!el) return;
+  el.innerHTML = "";
+  const list = stageFilter === "all" ? MATCHES : MATCHES.filter(m => m.stage === stageFilter);
+
+  // Group by date
+  const byDate = {};
+  list.forEach(m => {
+    const key = m.date + "|" + (STAGE_NAMES[m.stage] || m.stage);
+    if (!byDate[key]) byDate[key] = [];
+    byDate[key].push(m);
+  });
+
+  let cardIdx = 0;
+  Object.entries(byDate).forEach(([key, matches]) => {
+    const [date, stage] = key.split("|");
+    const dh = document.createElement("div");
+    dh.className = "bw-date-hdr";
+    dh.innerHTML = `<span>${date}</span><span style="color:var(--text3);font-size:10px;margin-left:8px">${stage}</span>`;
+    el.appendChild(dh);
+
+    matches.forEach(m => {
+      el.appendChild(buildMatchRow(m, cardIdx++));
+    });
+  });
+
+  if (!list.length) {
+    el.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px">No matches for this stage</div>`;
+  }
+}
+
+function buildMatchRow(m, idx) {
+  const wdw = WDW_ODDS[m.id] || [2.10, 3.30, 3.70];
+  const cfg = REC_CONFIG[m.rec] || REC_CONFIG.neutral;
+  const edgeColor = m.edge >= 10 ? "#15803d" : m.edge >= 4 ? "#16a34a" : m.edge >= 0 ? "#b45309" : "#dc2626";
+  const edgeClass = m.rec === "strong" ? "se-strong" : m.rec === "value" ? "se-value" : m.rec === "slight" ? "se-slight" : m.rec === "avoid" ? "se-avoid" : "se-neutral";
+  const edgeText = m.edge > 0 ? `+${m.edge}% AH` : m.edge === 0 ? "Fair" : `${m.edge}%`;
+  const wH = waterLabel(m.ah.homePayout);
+  const wA = waterLabel(m.ah.awayPayout);
+
+  const isProjected = m.stage !== "GRP";
+  const timeStr = isProjected ? "Projected" : (m.venue || "TBC");
+
+  const row = document.createElement("div");
+  row.className = "bw-match-row spring-in";
+  row.style.animationDelay = (idx * 0.04) + "s";
+
+  row.innerHTML = `
+    <div class="bw-match-time">
+      <span>${m.date.split(" ").pop()}</span>
+      <span class="bw-date-sm">${m.stage !== "GRP" ? "🔮Proj" : m.group?.replace("Group ","Grp-") || ""}</span>
+    </div>
+
+    <div class="bw-teams-col">
+      <div class="bw-team-row">
+        <span class="bw-team-flag">${m.homeFlag}</span>
+        <span class="bw-team-name fav">${m.home}</span>
       </div>
-      <div class="stat-bars">${statBars}</div>
-      <div class="team-players">${chips}</div>
-      <div class="team-history">${t.history}</div>`;
+      <div class="bw-team-row" style="margin-top:2px">
+        <span class="bw-team-flag">${m.awayFlag}</span>
+        <span class="bw-team-name">${m.away}</span>
+      </div>
+    </div>
+
+    <div class="bw-wdw">
+      <button class="bw-odds-btn" onclick="this.classList.toggle('selected')" title="Home win">
+        <span class="bw-odds-label">Home</span>${wdw[0].toFixed(2)}
+      </button>
+      <button class="bw-odds-btn" onclick="this.classList.toggle('selected')" title="Draw">
+        <span class="bw-odds-label">Draw</span>${wdw[1].toFixed(2)}
+      </button>
+      <button class="bw-odds-btn" onclick="this.classList.toggle('selected')" title="Away win">
+        <span class="bw-odds-label">Away</span>${wdw[2].toFixed(2)}
+      </button>
+    </div>
+
+    <div class="bw-ah-col">
+      <button class="bw-ah-btn" onclick="this.classList.toggle('selected')" title="${m.ah.homeLabel}">
+        <span class="bw-ah-label">${m.homeFlag} ${m.ah.homeLabel}</span>
+        <span class="bw-ah-val">${m.ah.homePayout}</span>
+        <span class="bw-ah-water" style="color:${wH.col}">${wH.txt}</span>
+      </button>
+      <button class="bw-ah-btn" onclick="this.classList.toggle('selected')" title="${m.ah.awayLabel}">
+        <span class="bw-ah-label">${m.awayFlag} ${m.ah.awayLabel}</span>
+        <span class="bw-ah-val">${m.ah.awayPayout}</span>
+        <span class="bw-ah-water" style="color:${wA.col}">${wA.txt}</span>
+      </button>
+    </div>
+
+    <div>
+      <span class="bw-sim-edge ${edgeClass}">${edgeText}</span>
+      ${m.rec === "strong" || m.rec === "value" ? `<div style="font-size:9px;color:var(--green);margin-top:3px;font-weight:600">SIM PICK ✓</div>` : ""}
+    </div>
+
+    <div class="bw-more-link" onclick="openMatchDetail('${m.id}')">More ›</div>
+  `;
+  return row;
+}
+
+function openMatchDetail(id) {
+  const m = MATCHES.find(x => x.id === id);
+  if (!m || !TEAMS[m.homeCode] || !TEAMS[m.awayCode]) return;
+  selectedA = m.homeCode;
+  selectedB = m.awayCode;
+  refreshSelectors();
+  renderH2H(selectedA, selectedB);
+  switchTab("bracket", document.querySelector('[data-tab="bracket"]'));
+  setTimeout(() => document.getElementById("tab-bracket")?.scrollIntoView({behavior:"smooth"}), 100);
+}
+
+// ═══════════════════════════════════════════════
+//  AH TABLE
+// ═══════════════════════════════════════════════
+function filterAH(btn) {
+  document.querySelectorAll(".bw-filter").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderAHTable(btn.dataset.f);
+}
+
+function renderAHTable(filter) {
+  const el = document.getElementById("ahTableBody");
+  if (!el) return;
+  el.innerHTML = "";
+  const list = filter === "all" ? MATCHES :
+    filter === "picks" ? MATCHES.filter(m => m.rec === "strong" || m.rec === "value") :
+    MATCHES.filter(m => m.rec === filter);
+
+  // Group by stage
+  const byStage = {};
+  list.forEach(m => { if (!byStage[m.stage]) byStage[m.stage] = []; byStage[m.stage].push(m); });
+  const order = ["GRP","R32","R16","QF","SF","F"];
+  const sNames = {GRP:"Group Stage",R16:"Round of 16",QF:"Quarter-Finals",SF:"Semi-Finals",F:"Final"};
+
+  let rowIdx = 0;
+  order.forEach(sk => {
+    if (!byStage[sk]) return;
+    const dv = document.createElement("div");
+    dv.className = "stage-divider";
+    dv.innerHTML = `<span class="stage-divider-label">${sNames[sk]||sk}</span><div class="stage-divider-line"></div>${sk!=="GRP"?'<span class="stage-proj-badge">PROJECTED</span>':""}`;
+    el.appendChild(dv);
+
+    byStage[sk].forEach(m => {
+      const wH = waterLabel(m.ah.homePayout);
+      const wA = waterLabel(m.ah.awayPayout);
+      const edgeSign = m.edge >= 0 ? "+" : "";
+      const edgeCls = m.edge >= 5 ? "bw-edge-pos" : m.edge < 0 ? "bw-edge-neg" : "bw-edge-neu";
+
+      const row = document.createElement("div");
+      row.className = `bw-ah-row rec-${m.rec} spring-in`;
+      row.style.animationDelay = (rowIdx++ * 0.03) + "s";
+      row.innerHTML = `
+        <div class="bw-ah-match">
+          <div class="bw-ah-match-date">${m.date} · ${m.group||m.stage}</div>
+          <div class="bw-ah-teams">${m.homeFlag} ${m.home}<br>${m.awayFlag} ${m.away}</div>
+        </div>
+        <div>
+          <div class="bw-ah-handicap">${m.ah.homeLabel}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.ah.awayLabel}</div>
+        </div>
+        <div>
+          <div class="bw-ah-payout ${wH.cls}">${m.ah.homePayout}</div>
+          <div class="bw-ah-payout ${wA.cls}" style="font-size:12px;margin-top:3px">${m.ah.awayPayout}</div>
+        </div>
+        <div class="bw-pct-cell">${m.simCoverAH}%</div>
+        <div class="bw-pct-cell" style="color:var(--text3)">${m.marketCoverAH}%</div>
+        <div class="bw-edge-cell ${edgeCls}">${edgeSign}${m.edge}%</div>
+        <div class="bw-verdict-cell">
+          <span class="bw-sim-edge ${m.rec==="strong"?"se-strong":m.rec==="value"?"se-value":m.rec==="slight"?"se-slight":m.rec==="avoid"?"se-avoid":"se-neutral"}">${m.recLabel}</span>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;line-height:1.4">${m.recDetail}</div>
+        </div>
+      `;
+      el.appendChild(row);
+    });
+  });
+
+  if (!list.length) {
+    el.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px">No matches in this category</div>`;
+  }
+}
+
+// water level helper
+function waterLabel(p) {
+  if (p >= 1.93) return {txt:"▲ "+p, col:"var(--green)", cls:"bw-water-hi"};
+  if (p >= 1.88) return {txt:"● "+p, col:"var(--amber)", cls:"bw-water-std"};
+  return {txt:"▼ "+p, col:"var(--red)", cls:"bw-water-lo"};
+}
+
+// ═══════════════════════════════════════════════
+//  GOLDEN BOOT / TOP SCORER
+// ═══════════════════════════════════════════════
+function renderScorer() {
+  const el = document.getElementById("scorerGrid");
+  if (!el) return;
+
+  // Intro strip
+  const intro = document.createElement("div");
+  intro.style.cssText = "background:#fff;border:1px solid var(--border);border-radius:var(--r2);padding:14px 18px;margin-bottom:20px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;box-shadow:var(--shadow)";
+  intro.innerHTML = `
+    <div style="font-size:28px">🥾</div>
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--text)">FIFA World Cup 2026 · Golden Boot Race</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px">Odds: Bet365 &amp; FanDuel (Jun 8 2026) · Decimal format · Simulation team depth score included</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+      <span style="background:var(--green3);color:var(--green);font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px">✓ Strong pick</span>
+      <span style="background:var(--amber2);color:var(--amber);font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px">◐ Each-way</span>
+      <span style="background:var(--page);color:var(--text3);font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px">— Long shot</span>
+    </div>`;
+  el.appendChild(intro);
+
+  const grid = document.createElement("div");
+  grid.className = "bw-scorer-grid";
+
+  TOP_SCORERS.forEach((p, i) => {
+    const card = document.createElement("div");
+    card.className = `bw-scorer-card spring-in ${i < 2 ? "top" : ""}`;
+    card.style.animationDelay = (i * 0.06) + "s";
+
+    const edgeLabel = p.edge === "strong" ? "✓ Strong pick" : p.edge === "value" ? "◐ Each-way value" : p.edge === "slight" ? "◐ Slight edge" : "— Long shot";
+    const edgeCss = p.edge === "strong" ? "background:var(--green3);color:var(--green)" :
+                    p.edge === "value" || p.edge === "slight" ? "background:var(--amber2);color:var(--amber)" :
+                    "background:var(--page);color:var(--text3)";
+
+    // ROI calculation
+    const impliedPct = (1/p.decimal*100).toFixed(1);
+
+    card.innerHTML = `
+      <div class="bw-player-face">
+        ${buildPlayerSVG(p)}
+        <div class="bw-rank-num">${p.rank}</div>
+        ${i < 2 ? `<div class="bw-top-badge">FAVOURITE</div>` : ""}
+      </div>
+      <div class="bw-scorer-info">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+          <span style="font-size:22px;line-height:1">${p.flag}</span>
+          <span class="bw-scorer-pos">${p.pos}</span>
+          <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;margin-left:auto;${edgeCss}">${edgeLabel}</span>
+        </div>
+        <div class="bw-scorer-name">${p.name}</div>
+        <div class="bw-scorer-team">
+          <span>${p.flag} ${p.team}</span>
+          <span style="color:var(--text3);font-size:11px">· ${p.club}</span>
+        </div>
+        <div class="bw-scorer-odds-row">
+          <div class="bw-scorer-odds-box">
+            <span class="bw-scorer-odds-label">DECIMAL</span>
+            <span class="bw-scorer-odds-val" style="color:${i<2?"var(--green)":"var(--text)"}">${p.decimal.toFixed(2)}</span>
+          </div>
+          <div class="bw-scorer-odds-box">
+            <span class="bw-scorer-odds-label">US ODDS</span>
+            <span class="bw-scorer-odds-val">${p.american}</span>
+          </div>
+        </div>
+        <button class="bw-scorer-btn" onclick="this.classList.toggle('selected')">
+          <span>Select to Bet</span>
+          <span class="bw-odds-decimal">${p.decimal.toFixed(2)}</span>
+        </button>
+        <div class="bw-scorer-sim">
+          <strong>Sim note:</strong> ${p.simNote}
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">
+          ${[p.stat1, p.stat2, p.stat3].map(s => `<span style="font-size:9px;background:var(--page);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text2)">${s}</span>`).join("")}
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:var(--text3)">Market implied: ${impliedPct}% chance of winning Golden Boot</div>
+      </div>`;
+
     grid.appendChild(card);
   });
+  el.appendChild(grid);
+}
+
+// ── PLAYER SVG AVATAR ──
+function buildPlayerSVG(p) {
+  const gradId = `g${p.rank}`;
+  const c1 = p.col1, c2 = p.col2;
+  // Skin tone shades
+  const skin = "#f0c8a0";
+  const hair = "#2a1a0a";
+
+  return `<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" class="bw-player-svg" aria-label="${p.name} player avatar">
+    <defs>
+      <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${c1}"/>
+        <stop offset="100%" stop-color="${darken(c1,40)}"/>
+      </linearGradient>
+      <pattern id="stripe${p.rank}" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <rect width="10" height="20" fill="rgba(255,255,255,0.04)"/>
+      </pattern>
+      <clipPath id="clip${p.rank}">
+        <rect width="200" height="140"/>
+      </clipPath>
+    </defs>
+    <!-- Background -->
+    <rect width="200" height="140" fill="url(#${gradId})"/>
+    <rect width="200" height="140" fill="url(#stripe${p.rank})"/>
+    <!-- Pitch pattern top -->
+    <circle cx="100" cy="-20" r="70" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    <!-- Jersey body (torso) -->
+    <path d="M60 140 L60 88 Q65 82 75 80 L88 77 L100 74 L112 77 L125 80 Q135 82 140 88 L140 140 Z" 
+          fill="${c1}" stroke="${c2}" stroke-width="2"/>
+    <!-- Jersey collar -->
+    <path d="M88 77 Q100 83 112 77 Q108 68 100 67 Q92 68 88 77Z" fill="${c2}"/>
+    <!-- Jersey number -->
+    <text x="100" y="118" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-weight="900" font-size="24" fill="rgba(255,255,255,0.9)" letter-spacing="2">${p.jersey}</text>
+    <!-- Neck -->
+    <rect x="93" y="60" width="14" height="12" rx="7" fill="${skin}"/>
+    <!-- Head -->
+    <ellipse cx="100" cy="52" rx="20" ry="22" fill="${skin}"/>
+    <!-- Hair -->
+    <path d="M80 46 Q82 28 100 28 Q118 28 120 46 Q112 38 100 37 Q88 38 80 46Z" fill="${hair}"/>
+    <!-- Eyes -->
+    <ellipse cx="93" cy="50" rx="3" ry="2.5" fill="#1a1a1a"/>
+    <ellipse cx="107" cy="50" rx="3" ry="2.5" fill="#1a1a1a"/>
+    <circle cx="94" cy="49" r="1" fill="white" opacity="0.7"/>
+    <circle cx="108" cy="49" r="1" fill="white" opacity="0.7"/>
+    <!-- Nose -->
+    <path d="M98 53 Q100 57 102 53" fill="none" stroke="${darken(skin,30)}" stroke-width="1" stroke-linecap="round"/>
+    <!-- Mouth - slight smile -->
+    <path d="M95 59 Q100 63 105 59" fill="none" stroke="${darken(skin,40)}" stroke-width="1.2" stroke-linecap="round"/>
+    <!-- Left arm -->
+    <path d="M60 90 Q48 95 44 108 L50 112 Q56 100 62 96Z" fill="${c1}" stroke="${c2}" stroke-width="1.5"/>
+    <!-- Right arm -->
+    <path d="M140 90 Q152 95 156 108 L150 112 Q144 100 138 96Z" fill="${c1}" stroke="${c2}" stroke-width="1.5"/>
+    <!-- Country flag strip bottom -->
+    <rect x="0" y="124" width="200" height="16" fill="rgba(0,0,0,0.35)"/>
+    <text x="100" y="136" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="10" font-weight="600" fill="rgba(255,255,255,0.85)" letter-spacing="0.5">${p.flag}  ${p.team.toUpperCase()}</text>
+  </svg>`;
+}
+
+function darken(hex, pct) {
+  try {
+    const num = parseInt(hex.replace("#",""),16);
+    const r = Math.max(0,(num>>16)-pct);
+    const g = Math.max(0,((num>>8)&0xff)-pct);
+    const b = Math.max(0,(num&0xff)-pct);
+    return "#"+((r<<16)|(g<<8)|b).toString(16).padStart(6,"0");
+  } catch(e) { return hex; }
 }
 
 // ═══════════════════════════════════════════════
-//  H2H SELECTORS
+//  H2H
 // ═══════════════════════════════════════════════
+const ABBR = {FRA:"FRA",ESP:"ESP",ARG:"ARG",ENG:"ENG",BRA:"BRA",POR:"POR",GER:"GER",MAR:"MAR",USA:"USA",NED:"NED",COL:"COL",URU:"URU",JPN:"JPN",BEL:"BEL",CRO:"CRO",SEN:"SEN"};
+const STAT_META = {
+  atk:{label:"ATTACK",color:"#f97316"},mid:{label:"MIDFIELD",color:"#8b5cf6"},
+  def:{label:"DEFENSE",color:"#0ea5e9"},gk:{label:"GK",color:"#eab308"},
+  form:{label:"FORM",color:"#22c55e"},depth:{label:"DEPTH",color:"#3b82f6"},exp:{label:"EXP",color:"#ec4899"}
+};
+
 function renderH2HSelectors() {
-  ['A','B'].forEach(side => {
-    const grid = document.getElementById(`selectorGrid${side}`);
+  ["A","B"].forEach(side => {
+    const grid = document.getElementById("selectorGrid"+side);
     if (!grid) return;
     Object.keys(TEAMS).forEach(id => {
-      const t   = TEAMS[id];
-      const pill = document.createElement('div');
-      pill.className = 'selector-pill' + ((side==='A'&&id===selectedA)||(side==='B'&&id===selectedB) ? ' selected' : '');
-      pill.dataset.id   = id;
-      pill.dataset.side = side;
-      pill.innerHTML = `<span class="sp-flag">${t.flag}</span><span class="sp-name">${t.name}</span>`;
+      const t = TEAMS[id];
+      const pill = document.createElement("div");
+      pill.className = "selector-pill" + ((side==="A"&&id===selectedA)||(side==="B"&&id===selectedB)?" selected":"");
+      pill.dataset.id = id; pill.dataset.side = side;
+      pill.innerHTML = `<span class="sp-flag">${t.flag}</span><span class="sp-name">${t.name.split(" ")[0]}</span>`;
       pill.onclick = () => selectTeam(side, id);
       grid.appendChild(pill);
     });
@@ -94,272 +432,160 @@ function renderH2HSelectors() {
 }
 
 function selectTeam(side, id) {
-  if (side === 'A') {
-    if (id === selectedB) selectedB = selectedA;
-    selectedA = id;
-  } else {
-    if (id === selectedA) selectedA = selectedB;
-    selectedB = id;
-  }
-  refreshSelectors();
-  renderH2H(selectedA, selectedB);
+  if (side==="A"){ if(id===selectedB) selectedB=selectedA; selectedA=id; }
+  else { if(id===selectedA) selectedA=selectedB; selectedB=id; }
+  refreshSelectors(); renderH2H(selectedA,selectedB);
 }
-
-function refreshSelectors() {
-  document.querySelectorAll('.selector-pill').forEach(p => {
-    const id   = p.dataset.id;
-    const side = p.dataset.side;
-    p.classList.toggle('selected', (side==='A'&&id===selectedA)||(side==='B'&&id===selectedB));
-  });
-}
-
-function swapTeams() {
-  [selectedA, selectedB] = [selectedB, selectedA];
-  refreshSelectors();
-  renderH2H(selectedA, selectedB);
-}
-
-// ═══════════════════════════════════════════════
-//  H2H PANEL
-// ═══════════════════════════════════════════════
-const ABBR = {
-  FRA:'FRA',ESP:'ESP',ARG:'ARG',ENG:'ENG',BRA:'BRA',POR:'POR',
-  GER:'GER',MAR:'MAR',USA:'USA',NED:'NED',COL:'COL',URU:'URU',
-  JPN:'JPN',BEL:'BEL',CRO:'CRO',SEN:'SEN'
-};
-const STAT_COLORS = {
-  atk:'#f97316', mid:'#a78bfa', def:'#22d3ee',
-  gk:'#facc15', form:'#4ade80', depth:'#60a5fa', exp:'#f472b6'
-};
+function swapTeams(){ [selectedA,selectedB]=[selectedB,selectedA]; refreshSelectors(); renderH2H(selectedA,selectedB); }
+function refreshSelectors(){ document.querySelectorAll(".selector-pill").forEach(p=>{ p.classList.toggle("selected",(p.dataset.side==="A"&&p.dataset.id===selectedA)||(p.dataset.side==="B"&&p.dataset.id===selectedB)); }); }
 
 function renderH2H(aId, bId) {
-  const panel = document.getElementById('h2hPanel');
+  const panel = document.getElementById("h2hPanel");
   if (!panel) return;
-  if (aId === bId) {
-    panel.innerHTML = `<div class="h2h-empty">Select two different teams</div>`;
-    return;
-  }
-  const tA = TEAMS[aId], tB = TEAMS[bId];
-  const pA = baseWinProb(aId, bId);
-  const pB = 1 - pA;
-  const pAp = Math.round(pA * 1000) / 10;
-  const pBp = Math.round(pB * 1000) / 10;
-  const ovrA = overallRating(aId), ovrB = overallRating(bId);
-  const favA = pA >= 0.5;
-  const colA = '#2979ff', colB = '#00e676';
+  if (aId===bId){ panel.innerHTML=`<div class="h2h-empty">Select two different teams</div>`; return; }
+  const tA=TEAMS[aId], tB=TEAMS[bId];
+  if (!tA||!tB){ panel.innerHTML=`<div class="h2h-empty">Team data not found</div>`; return; }
+  const pA=baseWinProb(aId,bId), pB=1-pA;
+  const pAp=(pA*100).toFixed(1), pBp=(pB*100).toFixed(1);
+  const ovrA=overallRating(aId), ovrB=overallRating(bId);
+  const colA="#1d4ed8", colB="#00a551";
+  const statKeys=["atk","mid","def","gk","form","exp","depth"];
+  const statLabels={atk:"ATTACK",mid:"MIDFIELD",def:"DEFENSE",gk:"GK",form:"FORM",exp:"EXP",depth:"DEPTH"};
+  let bigKey="atk", bigGap=0;
+  statKeys.forEach(k=>{ const d=Math.abs(tA.stats[k]-tB.stats[k]); if(d>bigGap){bigGap=d;bigKey=k;} });
 
-  // Bar fill width (A side)
-  const barW = pAp;
-
-  // Stat rows
-  const statKeys = ['atk','mid','def','gk','form','exp','depth'];
-  const statLabels = { atk:'ATTACK', mid:'MIDFIELD', def:'DEFENSE', gk:'GK', form:'FORM', exp:'EXPERIENCE', depth:'DEPTH' };
-  let biggestGapKey = statKeys[0];
-  let biggestGap = 0;
-  statKeys.forEach(k => {
-    const diff = Math.abs(tA.stats[k] - tB.stats[k]);
-    if (diff > biggestGap) { biggestGap = diff; biggestGapKey = k; }
-  });
-
-  const statRowsHtml = statKeys.map(k => {
-    const vA = tA.stats[k], vB = tB.stats[k];
-    const diff = vA - vB;
-    const isBig = k === biggestGapKey;
-    const bwA = Math.round((vA / 100) * 90); // max bar 90px
-    const bwB = Math.round((vB / 100) * 90);
+  const statRowsHtml = statKeys.map(k=>{
+    const vA=tA.stats[k], vB=tB.stats[k], diff=vA-vB, isBig=k===bigKey;
+    const bwA=Math.round(vA*0.7), bwB=Math.round(vB*0.7);
+    const absDiff=Math.abs(diff);
     let edgeHtml;
-    const absDiff = Math.abs(diff);
-    if (absDiff < 2) {
-      edgeHtml = `<span class="h2h-edge-tag edge-tie">EVEN</span>`;
-    } else if (isBig) {
-      const who = diff > 0 ? tA.name.split(' ')[0] : tB.name.split(' ')[0];
-      edgeHtml = `<span class="h2h-edge-tag edge-big">+${absDiff} biggest</span>`;
-    } else if (diff > 0) {
-      edgeHtml = `<span class="h2h-edge-tag edge-a">+${absDiff} ${ABBR[aId]}</span>`;
-    } else {
-      edgeHtml = `<span class="h2h-edge-tag edge-b">+${absDiff} ${ABBR[bId]}</span>`;
-    }
-    const rowClass = isBig ? 'h2h-stat-row highlight' : 'h2h-stat-row';
-    const lblClass = isBig ? 'h2h-stat-label highlight-label' : 'h2h-stat-label';
-    const barColor = STAT_COLORS[k];
-    const valColA = diff > 0 ? colA : diff < 0 ? 'var(--text3)' : 'var(--text2)';
-    const valColB = diff < 0 ? colB : diff > 0 ? 'var(--text3)' : 'var(--text2)';
-    return `<div class="${rowClass}">
-      <div class="h2h-val" style="color:${valColA}">${vA}</div>
-      <div class="h2h-bar-left"><div class="h2h-bar-seg" style="width:${bwA}px;background:${barColor};opacity:${diff>=0?1:0.4}"></div></div>
-      <div class="${lblClass}">${statLabels[k]}</div>
-      <div class="h2h-bar-right"><div class="h2h-bar-seg" style="width:${bwB}px;background:${barColor};opacity:${diff<=0?1:0.4}"></div></div>
-      <div class="h2h-val" style="color:${valColB}">${vB}</div>
+    if(absDiff<2) edgeHtml=`<span class="h2h-edge-tag edge-tie">EVEN</span>`;
+    else if(isBig) edgeHtml=`<span class="h2h-edge-tag edge-big">+${absDiff} GAP</span>`;
+    else if(diff>0) edgeHtml=`<span class="h2h-edge-tag edge-a">+${absDiff} ${ABBR[aId]||aId}</span>`;
+    else edgeHtml=`<span class="h2h-edge-tag edge-b">+${absDiff} ${ABBR[bId]||bId}</span>`;
+    const vAColor=diff>0?colA:diff<0?"var(--text3)":"var(--text2)";
+    const vBColor=diff<0?colB:diff>0?"var(--text3)":"var(--text2)";
+    const barCol=STAT_META[k]?.color||"#888";
+    return `<div class="h2h-stat-row${isBig?" highlight":""}">
+      <div class="h2h-val${diff<0?" muted":""}" style="color:${vAColor}">${vA}</div>
+      <div class="h2h-bar-l"><div class="h2h-bar-seg" style="width:${bwA}px;background:${barCol};opacity:${diff>=0?1:.4}"></div></div>
+      <div class="h2h-stat-label${isBig?" hl":""}">${statLabels[k]||k}</div>
+      <div class="h2h-bar-r"><div class="h2h-bar-seg" style="width:${bwB}px;background:${barCol};opacity:${diff<=0?1:.4}"></div></div>
+      <div class="h2h-val${diff>0?" muted":""}" style="color:${vBColor}">${vB}</div>
     </div>`;
-  }).join('');
+  }).join("");
 
-  // Insight text
-  const favTeam = favA ? tA : tB;
-  const undTeam = favA ? tB : tA;
-  const favId   = favA ? aId : bId;
-  const undId   = favA ? bId : aId;
-  const bigStat = statLabels[biggestGapKey].toLowerCase();
-  const favPct  = favA ? pAp : pBp;
-  const insights = [
-    `<strong>${favTeam.name}</strong> are favoured at <strong>${favPct}%</strong>. The biggest edge is in <strong>${bigStat}</strong> (+${biggestGap} pts) — a structural advantage that's hard to overcome in a knockout game.`,
-    `<strong>${undTeam.name}</strong> have a <strong>${(100-favPct).toFixed(1)}%</strong> upset chance. ${undTeam.edge}`,
-    `Key duel: <strong>${favTeam.players[0]}</strong> vs <strong>${undTeam.players[0]}</strong> — the team that wins this individual battle typically controls the match tempo.`
-  ];
-  const insight = insights[Math.floor(Math.random() * insights.length)];
+  const bigStatLabel = statLabels[bigKey]||bigKey;
+  const favTeam=pA>=0.5?tA:tB, undTeam=pA>=0.5?tB:tA;
+  const favPct=pA>=0.5?pAp:pBp;
+  const insight = `<strong>${favTeam.name}</strong> are favoured at <strong>${favPct}%</strong>. Biggest gap: <strong>${bigStatLabel}</strong> (+${bigGap} pts). ${undTeam.edge||""}`;
 
   panel.innerHTML = `
     <div class="h2h-header">
       <div class="h2h-team-col">
-        <div class="h2h-abbr" style="color:${colA}">${ABBR[aId]}</div>
+        <div class="h2h-abbr" style="color:${colA}">${tA.flag} ${ABBR[aId]||aId}</div>
         <div class="h2h-team-name">${tA.name}</div>
-        <div class="h2h-team-sub">${tA.history.split('·')[0].trim()}</div>
-        <div class="h2h-win-pct" style="color:${favA?'var(--gold)':colA}">${pAp}%</div>
+        <div class="h2h-team-sub">${tA.history?.split("·")[0]?.trim()||""}</div>
+        <div class="h2h-win-pct" style="color:${pA>=0.5?"#4ade80":colA}">${pAp}%</div>
         <div class="h2h-win-label">win probability</div>
       </div>
       <div class="h2h-center-col">
         <div class="h2h-stage-badge">HEAD-TO-HEAD</div>
         <div class="h2h-ovr-compare">
           <span class="h2h-ovr-num" style="color:${colA}">${ovrA}</span>
-          <span>vs</span>
+          <span style="color:rgba(255,255,255,.3);margin:0 5px">vs</span>
           <span class="h2h-ovr-num" style="color:${colB}">${ovrB}</span>
         </div>
-        <div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em">OVR RATING</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:3px;letter-spacing:.06em">OVR RATING</div>
       </div>
       <div class="h2h-team-col">
-        <div class="h2h-abbr" style="color:${colB}">${ABBR[bId]}</div>
+        <div class="h2h-abbr" style="color:${colB}">${tB.flag} ${ABBR[bId]||bId}</div>
         <div class="h2h-team-name">${tB.name}</div>
-        <div class="h2h-team-sub">${tB.history.split('·')[0].trim()}</div>
-        <div class="h2h-win-pct" style="color:${!favA?'var(--gold)':colB}">${pBp}%</div>
+        <div class="h2h-team-sub">${tB.history?.split("·")[0]?.trim()||""}</div>
+        <div class="h2h-win-pct" style="color:${pB>pA?"#4ade80":colB}">${pBp}%</div>
         <div class="h2h-win-label">win probability</div>
       </div>
     </div>
-
-    <div class="h2h-prob-bar-wrap">
-      <div class="h2h-prob-bar-track">
-        <div class="h2h-prob-bar-fill" style="width:${barW}%;background:linear-gradient(90deg,${colA},#1565c0)"></div>
-      </div>
+    <div class="h2h-prob-wrap">
+      <div class="h2h-prob-track"><div class="h2h-prob-fill" style="width:${pAp}%"></div></div>
       <div class="h2h-prob-labels">
         <span style="color:${colA};font-weight:700">${tA.name} ${pAp}%</span>
-        <span style="color:var(--text3);font-size:10px">±14% noise per simulation run</span>
+        <span style="color:rgba(255,255,255,.3);font-size:9px">model + ±14% noise</span>
         <span style="color:${colB};font-weight:700">${pBp}% ${tB.name}</span>
       </div>
     </div>
-
     <div class="h2h-stats">
-      <div class="h2h-stat-header">
-        <div style="color:${colA}">${ABBR[aId]}</div>
-        <div style="text-align:right;color:var(--text3)">◀</div>
-        <div>STAT</div>
-        <div style="text-align:left;color:var(--text3)">▶</div>
-        <div style="color:${colB}">${ABBR[bId]}</div>
-      </div>
-      ${statRowsHtml}
+      <div class="h2h-stat-grid" style="margin-bottom:0">${statRowsHtml}</div>
     </div>
-
-    <div class="h2h-insight">💡 ${insight}</div>
-  `;
-
-  // Animate bars in after render
-  setTimeout(() => {
-    panel.querySelectorAll('.h2h-bar-seg').forEach(b => {
-      const w = b.style.width;
-      b.style.width = '0';
-      requestAnimationFrame(() => { b.style.width = w; });
-    });
-  }, 50);
+    <div class="h2h-insight">💡 ${insight}</div>`;
 }
 
 // ═══════════════════════════════════════════════
 //  BRACKET
 // ═══════════════════════════════════════════════
 function renderBracket() {
-  const leftEl  = document.getElementById('bracketLeft');
-  const rightEl = document.getElementById('bracketRight');
-  if (!leftEl || !rightEl) return;
+  const leftEl=document.getElementById("bracketLeft"), rightEl=document.getElementById("bracketRight");
+  if (!leftEl||!rightEl) return;
   R16.forEach(m => {
-    const t1 = TEAMS[m.t1], t2 = TEAMS[m.t2];
-    const p1 = Math.round(baseWinProb(m.t1, m.t2) * 100);
-    const p2 = 100 - p1;
-    const fav = p1 >= p2 ? m.t1 : m.t2;
-    const div = document.createElement('div');
-    div.className = 'bracket-match';
-    div.title = 'Click to analyse in H2H';
-    div.onclick = () => {
-      selectedA = m.t1; selectedB = m.t2;
-      refreshSelectors();
-      renderH2H(selectedA, selectedB);
-      document.getElementById('h2h').scrollIntoView({ behavior:'smooth', block:'start' });
-    };
-    div.innerHTML = `
+    const t1=TEAMS[m.t1], t2=TEAMS[m.t2];
+    if (!t1||!t2) return;
+    const p1=Math.round(baseWinProb(m.t1,m.t2)*100), p2=100-p1;
+    const fav=p1>=p2?m.t1:m.t2;
+    const div=document.createElement("div");
+    div.className="bracket-match";
+    div.title="Click to analyse in Head-to-Head";
+    div.onclick=()=>{ selectedA=m.t1; selectedB=m.t2; refreshSelectors(); renderH2H(selectedA,selectedB); };
+    div.innerHTML=`
       <div class="bracket-match-stage">${m.label}</div>
       <div class="bracket-team">
-        <span style="font-size:16px">${t1.flag}</span>
-        <span class="bracket-team-name" style="${fav===m.t1?'color:var(--text)':'color:var(--text3)'}">${t1.name}</span>
-        <span class="bracket-pct" style="color:${fav===m.t1?'var(--gold)':'var(--text3)'}">${p1}%</span>
+        <span style="font-size:15px">${t1.flag}</span>
+        <span class="bracket-team-name" style="${fav===m.t1?"color:var(--text);font-weight:700":"color:var(--text3)"}">${t1.name}</span>
+        <span class="bracket-pct" style="color:${fav===m.t1?"var(--green)":"var(--text3)"}">${p1}%</span>
       </div>
-      <div class="bracket-team" style="margin-top:4px">
-        <span style="font-size:16px">${t2.flag}</span>
-        <span class="bracket-team-name" style="${fav===m.t2?'color:var(--text)':'color:var(--text3)'}">${t2.name}</span>
-        <span class="bracket-pct" style="color:${fav===m.t2?'var(--gold)':'var(--text3)'}">${p2}%</span>
+      <div class="bracket-team" style="margin-top:3px">
+        <span style="font-size:15px">${t2.flag}</span>
+        <span class="bracket-team-name" style="${fav===m.t2?"color:var(--text);font-weight:700":"color:var(--text3)"}">${t2.name}</span>
+        <span class="bracket-pct" style="color:${fav===m.t2?"var(--green)":"var(--text3)"}">${p2}%</span>
       </div>
-      <div class="bracket-bar"><div class="bracket-bar-fill" style="width:${p1}%;background:var(--gold)"></div></div>`;
-    (m.half === 'L' ? leftEl : rightEl).appendChild(div);
+      <div class="bracket-bar"><div class="bracket-bar-fill" style="width:${p1}%"></div></div>`;
+    (m.half==="L"?leftEl:rightEl).appendChild(div);
   });
 }
 
 // ═══════════════════════════════════════════════
-//  RESULTS
+//  SIMULATION RESULTS
 // ═══════════════════════════════════════════════
 function renderResults(data) {
-  document.getElementById('resultsPlaceholder').style.display = 'none';
-  document.getElementById('resultsContent').style.display     = 'block';
-  document.getElementById('finalPlaceholder').style.display   = 'none';
-  document.getElementById('finalContent').style.display       = 'block';
-  document.getElementById('navBadge').style.display = 'inline';
-
+  document.getElementById("simPlaceholder").style.display="none";
+  document.getElementById("simResults").style.display="block";
+  document.getElementById("simBadge").style.display="inline";
   renderSFProbs(data.sfProbs);
   renderMatchups(data.matchups);
   renderFinalStage(data);
   renderChampion(data);
   renderWinTable(data.winProbs);
-
-  document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'start' });
+  renderVerdicts(data.sfProbs, data.winProbs);
+  switchTab("sim", document.querySelector('[data-tab="sim"]'));
 }
+window.renderResults = renderResults;
 
 function renderSFProbs(sfProbs) {
-  const grid = document.getElementById('sfProbGrid');
-  grid.innerHTML = '';
-  const medals = ['🥇','🥈','🥉','4️⃣'];
-  const colors  = ['var(--gold)','#a0aec0','#cd7f32','var(--blue2)'];
-  sfProbs.forEach((item, idx) => {
-    const t = TEAMS[item.t];
-    const isTop4 = idx < 4;
-    const barColor = idx === 0 ? 'var(--gold)' : idx < 4 ? colors[idx] : 'var(--border2)';
-    const barWidth = (item.pct / sfProbs[0].pct) * 100;
-    const row = document.createElement('div');
-    row.className = `sf-prob-row fade-in ${isTop4?'top4':''} ${idx===0?'rank1':''}`;
-    row.style.animationDelay = (idx * 0.05) + 's';
-    row.style.cursor = 'pointer';
-    row.title = 'Click to see H2H analysis';
-    row.onclick = () => {
-      selectedA = item.t;
-      if (selectedB === item.t) selectedB = sfProbs[idx===0?1:0].t;
-      refreshSelectors();
-      renderH2H(selectedA, selectedB);
-      document.getElementById('h2h').scrollIntoView({ behavior:'smooth', block:'start' });
-    };
-    const tagHtml = idx < 4 ? `<span class="prob-tag tag-sf">${idx===0?'🏆 Top Pick':'Semi-finalist'}</span>` :
-                    idx < 6 ? `<span class="prob-tag tag-dark">Dark horse</span>` : '';
-    row.innerHTML = `
+  const grid=document.getElementById("sfProbGrid"); if(!grid) return;
+  grid.innerHTML="";
+  const medals=["🥇","🥈","🥉","4️⃣"], colors=["var(--green)","#a0aec0","#cd7f32","var(--blue)"];
+  sfProbs.forEach((item,idx)=>{
+    const t=TEAMS[item.t]; if(!t) return;
+    const isTop4=idx<4, barColor=idx<4?colors[idx]:"var(--border2)", barW=(item.pct/sfProbs[0].pct)*100;
+    const row=document.createElement("div");
+    row.className=`sf-prob-row fade-in ${isTop4?"top4":""} ${idx===0?"rank1":""}`;
+    row.style.animationDelay=(idx*.05)+"s"; row.style.cursor="pointer";
+    row.onclick=()=>{ selectedA=item.t; if(selectedB===item.t) selectedB=sfProbs[idx===0?1:0].t; refreshSelectors(); renderH2H(selectedA,selectedB); switchTab("bracket",document.querySelector("[data-tab='bracket']")); };
+    const tagHtml=idx<4?`<span class="prob-tag tag-sf">${idx===0?"🏆 Top":"SF"}</span>`:idx<6?`<span class="prob-tag tag-dark">Dark horse</span>`:"";
+    row.innerHTML=`
       <div class="prob-rank" style="color:${barColor}">${isTop4?medals[idx]:idx+1}</div>
       <div class="prob-flag-lg">${t.flag}</div>
-      <div class="prob-name-col">
-        <div class="prob-name-lg">${t.name}</div>
-        ${isTop4?`<div class="prob-record-sm">${t.record}</div>`:''}
-      </div>
-      <div class="prob-bar-col">
-        <div class="prob-bar-lg"><div class="prob-bar-lg-fill" style="width:${barWidth}%;background:${barColor}"></div></div>
-      </div>
+      <div class="prob-name-col"><div class="prob-name-lg">${t.name}</div>${isTop4?`<div class="prob-record-sm">${t.record}</div>`:""}</div>
+      <div class="prob-bar-col"><div class="prob-bar-lg"><div class="prob-bar-lg-fill" style="width:${barW}%;background:${barColor}"></div></div></div>
       <div class="prob-pct-lg" style="color:${barColor}">${item.pct.toFixed(1)}%</div>
       ${tagHtml}`;
     grid.appendChild(row);
@@ -367,512 +593,175 @@ function renderSFProbs(sfProbs) {
 }
 
 function renderMatchups(matchups) {
-  const grid = document.getElementById('matchupGrid');
-  grid.innerHTML = '';
-  matchups.forEach((m, idx) => {
-    const t1 = TEAMS[m.t1], t2 = TEAMS[m.t2];
-    const card = document.createElement('div');
-    card.className = `matchup-card fade-in ${idx===0?'top':''}`;
-    card.style.animationDelay = (idx * 0.06) + 's';
-    card.style.cursor = 'pointer';
-    card.title = 'Click to analyse this matchup';
-    card.onclick = () => {
-      selectedA = m.t1; selectedB = m.t2;
-      refreshSelectors();
-      renderH2H(selectedA, selectedB);
-      document.getElementById('h2h').scrollIntoView({ behavior:'smooth', block:'start' });
-    };
-    card.innerHTML = `
-      ${idx===0?'<div class="matchup-top-tag">MOST LIKELY</div>':''}
+  const grid=document.getElementById("matchupGrid"); if(!grid) return;
+  grid.innerHTML="";
+  matchups.forEach((m,idx)=>{
+    const t1=TEAMS[m.t1],t2=TEAMS[m.t2]; if(!t1||!t2) return;
+    const card=document.createElement("div");
+    card.className=`matchup-card fade-in ${idx===0?"top":""}`;
+    card.style.animationDelay=(idx*.06)+"s"; card.style.cursor="pointer";
+    card.onclick=()=>{ selectedA=m.t1; selectedB=m.t2; refreshSelectors(); renderH2H(selectedA,selectedB); switchTab("bracket",document.querySelector("[data-tab='bracket']")); };
+    card.innerHTML=`
+      ${idx===0?`<div class="matchup-top-tag">MOST LIKELY</div>`:""}
       <div class="matchup-teams">
-        <div class="matchup-team">
-          <div class="matchup-flag">${t1.flag}</div>
-          <div class="matchup-name">${t1.name}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">OVR ${overallRating(m.t1)}</div>
-        </div>
+        <div class="matchup-team"><div class="matchup-flag">${t1.flag}</div><div class="matchup-name">${t1.name}</div></div>
         <div class="matchup-vs">VS</div>
-        <div class="matchup-team">
-          <div class="matchup-flag">${t2.flag}</div>
-          <div class="matchup-name">${t2.name}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">OVR ${overallRating(m.t2)}</div>
-        </div>
+        <div class="matchup-team"><div class="matchup-flag">${t2.flag}</div><div class="matchup-name">${t2.name}</div></div>
       </div>
-      <div class="matchup-pct-row">
-        <span class="matchup-pct-val">${m.pct.toFixed(1)}%</span>
-        <span class="matchup-pct-label">chance of this matchup</span>
-      </div>`;
+      <div class="matchup-pct-row"><span class="matchup-pct-val">${m.pct.toFixed(1)}%</span><span class="matchup-pct-label"> probability</span></div>`;
     grid.appendChild(card);
   });
 }
 
 function renderFinalStage(data) {
-  const el = document.getElementById('finalStage');
-  const t1 = data.topFinal.t1, t2 = data.topFinal.t2;
-  const p1 = data.t1WinPct >= data.t2WinPct ? data.t1WinPct : data.t2WinPct;
-  const teamA = data.t1WinPct >= data.t2WinPct ? t1 : t2;
-  const teamB = teamA === t1 ? t2 : t1;
-  const tA = TEAMS[teamA], tB = TEAMS[teamB];
-  el.innerHTML = `
-    <div class="final-badge">🏆 The Final · July 19 · MetLife Stadium, New Jersey</div>
+  const el=document.getElementById("finalStage"); if(!el) return;
+  const t1=data.topFinal.t1,t2=data.topFinal.t2;
+  const p1=data.t1WinPct>=data.t2WinPct?data.t1WinPct:data.t2WinPct;
+  const teamA=data.t1WinPct>=data.t2WinPct?t1:t2, teamB=teamA===t1?t2:t1;
+  const tA=TEAMS[teamA],tB=TEAMS[teamB]; if(!tA||!tB) return;
+  el.innerHTML=`
+    <div class="final-badge">🏆 THE FINAL · JULY 19 · METLIFE STADIUM, NEW JERSEY</div>
     <div class="final-matchup">
       <div class="final-team">
         <div class="final-flag">${tA.flag}</div>
         <div class="final-name">${tA.name}</div>
         <div class="final-sub">SF1 Winner</div>
-        <div class="final-pct" style="color:var(--gold)">${p1.toFixed(1)}%</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">to win Final</div>
+        <div class="final-pct" style="color:#4ade80">${p1.toFixed(1)}%</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">to win Final</div>
       </div>
       <div class="final-vs">FINAL<br><span>JUL 19</span></div>
       <div class="final-team">
         <div class="final-flag">${tB.flag}</div>
         <div class="final-name">${tB.name}</div>
         <div class="final-sub">SF2 Winner</div>
-        <div class="final-pct" style="color:var(--text2)">${(100-p1).toFixed(1)}%</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">to win Final</div>
+        <div class="final-pct" style="color:rgba(255,255,255,.5)">${(100-p1).toFixed(1)}%</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">to win Final</div>
       </div>
     </div>
-    <div class="final-bar">
-      <div style="width:${p1}%;height:100%;background:linear-gradient(90deg,var(--gold),#c47c00);border-radius:4px"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;font-size:11px;margin-top:6px;padding:0 2px;font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:.05em">
-      <span style="color:var(--gold)">${tA.name} ${p1.toFixed(1)}%</span>
-      <span style="color:var(--text3)">±14% simulation noise per match</span>
-      <span style="color:var(--text3)">${tB.name} ${(100-p1).toFixed(1)}%</span>
+    <div class="final-bar"><div style="width:${p1}%;height:100%;background:var(--green);border-radius:3px"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:5px;color:rgba(255,255,255,.4)">
+      <span style="color:var(--green);font-weight:700">${tA.name} ${p1.toFixed(1)}%</span>
+      <span>±14% simulation noise per match</span>
+      <span>${tB.name} ${(100-p1).toFixed(1)}%</span>
     </div>`;
 }
 
 function renderChampion(data) {
-  const el  = document.getElementById('championStage');
-  const t   = TEAMS[data.champion];
-  const winPct = data.winProbs.find(w => w.t === data.champion)?.pct || 0;
-  const PATHS = {
-    FRA:[{stage:'R16',vs:'vs Senegal',pct:'92.5%'},{stage:'QF',vs:'vs Germany',pct:'76.5%'},{stage:'SF',vs:'vs Spain',pct:'59.8%'},{stage:'FINAL',vs:'vs Argentina',pct:`${(100-data.t2WinPct).toFixed(1)}%`}],
-    ARG:[{stage:'R16',vs:'vs Colombia',pct:'84.0%'},{stage:'QF',vs:'vs Brazil',pct:'62.1%'},{stage:'SF',vs:'vs England',pct:'69.3%'},{stage:'FINAL',vs:'vs France',pct:`${(100-data.t1WinPct).toFixed(1)}%`}],
-    ESP:[{stage:'R16',vs:'vs Japan',pct:'86.3%'},{stage:'QF',vs:'vs Morocco',pct:'75.2%'},{stage:'SF',vs:'vs France',pct:'40.2%'},{stage:'FINAL',vs:'vs Argentina',pct:'50%'}],
-    ENG:[{stage:'R16',vs:'vs Croatia',pct:'71.0%'},{stage:'QF',vs:'vs Portugal',pct:'52.7%'},{stage:'SF',vs:'vs Argentina',pct:'30.7%'},{stage:'FINAL',vs:'vs France',pct:'46%'}],
+  const el=document.getElementById("championStage"); if(!el) return;
+  const t=TEAMS[data.champion]; if(!t) return;
+  const winPct=(data.winProbs.find(w=>w.t===data.champion)?.pct||0).toFixed(1);
+  const PATHS={
+    FRA:[{stage:"R16",vs:"vs Senegal",pct:"92.5%"},{stage:"QF",vs:"vs Germany",pct:"76.5%"},{stage:"SF",vs:"vs Spain",pct:"59.8%"},{stage:"FINAL",vs:"vs Argentina",pct:`${(100-data.t2WinPct).toFixed(1)}%`}],
+    ARG:[{stage:"R16",vs:"vs Colombia",pct:"84.0%"},{stage:"QF",vs:"vs Brazil",pct:"62.1%"},{stage:"SF",vs:"vs England",pct:"69.3%"},{stage:"FINAL",vs:"vs France",pct:`${(100-data.t1WinPct).toFixed(1)}%`}],
+    ESP:[{stage:"R16",vs:"vs Japan",pct:"86.3%"},{stage:"QF",vs:"vs Morocco",pct:"75.2%"},{stage:"SF",vs:"vs France",pct:"40.2%"},{stage:"FINAL",vs:"vs Argentina",pct:"50%"}],
+    ENG:[{stage:"R16",vs:"vs Croatia",pct:"71.0%"},{stage:"QF",vs:"vs Portugal",pct:"52.7%"},{stage:"SF",vs:"vs Argentina",pct:"30.7%"},{stage:"FINAL",vs:"vs France",pct:"46%"}],
   };
-  const path = PATHS[data.champion] || [{stage:'R16',vs:'Strong run',pct:'—'},{stage:'QF',vs:'Upset specialists',pct:'—'},{stage:'SF',vs:'Reached semi',pct:'—'},{stage:'FINAL',vs:'Won it',pct:`${winPct.toFixed(1)}%`}];
-  const pathHtml = path.map((p,i) => `
-    <div class="path-step">
-      ${i>0?'<div class="path-arrow">→</div>':''}
-      <div class="path-box">
-        <div class="path-stage">${p.stage}</div>
-        <div class="path-opponent">${p.vs}</div>
-        <div class="path-pct">${p.pct}</div>
-      </div>
-    </div>`).join('');
-  el.innerHTML = `
-    <div class="champion-glow"></div>
-    <div class="champion-eyebrow">🏆 World Cup Champion — 2026</div>
+  const path=PATHS[data.champion]||[{stage:"R16",vs:"Strong run",pct:"—"},{stage:"QF",vs:"Upset run",pct:"—"},{stage:"SF",vs:"Semi-final",pct:"—"},{stage:"FINAL",vs:"Won it",pct:winPct+"%"}];
+  const pathHtml=path.map((p,i)=>`<div class="path-step">${i>0?'<div class="path-arrow">→</div>':""}<div class="path-box"><div class="path-stage">${p.stage}</div><div class="path-opponent">${p.vs}</div><div class="path-pct">${p.pct}</div></div></div>`).join("");
+  el.innerHTML=`
+    <div class="champion-eyebrow">🏆 WORLD CUP CHAMPION — 2026</div>
     <div class="champion-flag">${t.flag}</div>
     <div class="champion-name">${t.name}</div>
-    <div class="champion-sub">${t.history}</div>
+    <div class="champion-sub">${t.history||""}</div>
     <div class="champion-prob-box">
-      <div class="champion-prob-num">${winPct.toFixed(1)}%</div>
-      <div class="champion-prob-label">
-        <div class="champion-prob-main">Probability to win tournament</div>
-        <div class="champion-prob-sub">from 100,000 simulation runs</div>
-      </div>
+      <div class="champion-prob-num">${winPct}%</div>
+      <div><div class="champion-prob-main">Probability to win tournament</div><div class="champion-prob-sub">from 100,000 simulation runs</div></div>
     </div>
     <div class="champion-path">${pathHtml}</div>`;
 }
 
 function renderWinTable(winProbs) {
-  const el = document.getElementById('winTable');
-  el.className = 'win-table';
-  el.innerHTML = '';
-  const maxPct = winProbs[0].pct;
-  const colors = ['var(--gold)','#a0aec0','#cd7f32','var(--blue2)'];
-  winProbs.forEach((item, idx) => {
-    const t = TEAMS[item.t];
-    const barW = (item.pct / maxPct) * 100;
-    const barColor = idx < 4 ? colors[idx] : 'var(--border2)';
-    const note = idx===0?'🏆 Champion':idx===1?'Runner-up':idx===2?'3rd place':idx===3?'4th place':idx<6?'QF exit':'';
-    const row = document.createElement('div');
-    row.className = `win-row fade-in ${idx===0?'w1':idx===1?'w2':''}`;
-    row.style.animationDelay = (idx * 0.04) + 's';
-    row.style.cursor = 'pointer';
-    row.onclick = () => {
-      selectedA = item.t;
-      if (selectedB === item.t) selectedB = winProbs[idx===0?1:0].t;
-      refreshSelectors();
-      renderH2H(selectedA, selectedB);
-      document.getElementById('h2h').scrollIntoView({ behavior:'smooth', block:'start' });
-    };
-    row.innerHTML = `
+  const el=document.getElementById("winTable"); if(!el) return;
+  el.className="win-table"; el.innerHTML="";
+  const maxPct=winProbs[0].pct;
+  const colors=["var(--green)","#a0aec0","#cd7f32","var(--blue)"];
+  winProbs.forEach((item,idx)=>{
+    const t=TEAMS[item.t]; if(!t) return;
+    const barW=(item.pct/maxPct)*100, barColor=idx<4?colors[idx]:"var(--border2)";
+    const note=idx===0?"🏆 Champion":idx===1?"Runner-up":idx===2?"3rd place":idx===3?"4th place":idx<6?"QF exit":"";
+    const row=document.createElement("div");
+    row.className=`win-row fade-in ${idx===0?"w1":""}`; row.style.animationDelay=(idx*.04)+"s"; row.style.cursor="pointer";
+    row.onclick=()=>{ selectedA=item.t; if(selectedB===item.t) selectedB=winProbs[idx===0?1:0].t; refreshSelectors(); renderH2H(selectedA,selectedB); switchTab("bracket",document.querySelector("[data-tab='bracket']")); };
+    row.innerHTML=`
       <div class="win-rank" style="color:${barColor}">${idx+1}</div>
       <div class="win-flag">${t.flag}</div>
-      <div class="win-name" style="color:${idx<4?'var(--text)':'var(--text2)'}">${t.name}</div>
+      <div class="win-name">${t.name}</div>
       <div class="win-bar-col"><div class="win-bar-fill" style="width:${barW}%;background:${barColor}"></div></div>
       <div class="win-pct" style="color:${barColor}">${item.pct.toFixed(1)}%</div>
-      ${note?`<div class="win-note">${note}</div>`:''}`;
+      ${note?`<div class="win-note">${note}</div>`:""}`;
     el.appendChild(row);
   });
 }
 
-// ═══════════════════════════════════════════════
-//  VERDICT SECTION
-// ═══════════════════════════════════════════════
 function renderVerdicts(sfProbs, winProbs) {
-  // Remove old verdict if exists
-  const old = document.getElementById('verdictSection');
-  if (old) old.remove();
+  const old=document.getElementById("verdictSection"); if(old) old.remove();
+  const anchor=document.getElementById("simResults"); if(!anchor) return;
+  const top4=sfProbs.slice(0,4), champion=winProbs[0].t, runnerUp=winProbs[1].t;
+  const champ=TEAMS[champion], runner=TEAMS[runnerUp]; if(!champ||!runner) return;
+  const champWin=winProbs[0].pct, runnerWin=winProbs[1].pct;
+  const PDATA = typeof PLAYER_DATA !== "undefined" ? PLAYER_DATA : {};
 
-  const anchor = document.getElementById('resultsContent');
-  if (!anchor) return;
+  const duelsHtml=[[PDATA[champion]?.[0],PDATA[runnerUp]?.[0],"ATTACK"],[PDATA[champion]?.[1],PDATA[runnerUp]?.[1],"GK"],[PDATA[champion]?.[2],PDATA[runnerUp]?.[2],"MIDFIELD"]].filter(d=>d[0]&&d[1]).map(d=>`<div class="fvb-duel"><div><div class="fvb-player-name">${d[0].name.split(" ").pop()}</div><div class="fvb-player-role">${champ.flag} ${d[0].role}</div></div><div class="fvb-duel-vs">VS</div><div><div class="fvb-player-name">${d[1].name.split(" ").pop()}</div><div class="fvb-player-role">${runner.flag} ${d[1].role}</div></div><div style="font-size:9px;color:rgba(255,255,255,.35);border-left:1px solid rgba(255,255,255,.1);padding-left:8px;margin-left:4px;font-weight:700;letter-spacing:.06em">${d[2]}</div></div>`).join("");
 
-  const top4 = sfProbs.slice(0, 4);
-  const champion = winProbs[0].t;
-  const runnerUp = winProbs[1].t;
+  const medals=["🥇","🥈","🥉","4️⃣"], colors=["var(--green)","#a0aec0","#cd7f32","var(--blue)"];
+  const KO_PATH={FRA:[{stage:"R16",vs:"vs Senegal",pct:92.5},{stage:"QF",vs:"vs Germany",pct:76.5},{stage:"SF",vs:"vs Spain",pct:59.8}],ESP:[{stage:"R16",vs:"vs Japan",pct:86.3},{stage:"QF",vs:"vs Morocco",pct:75.2},{stage:"SF",vs:"vs France",pct:40.2}],ARG:[{stage:"R16",vs:"vs Colombia",pct:84.0},{stage:"QF",vs:"vs Brazil",pct:62.1},{stage:"SF",vs:"vs England",pct:69.3}],ENG:[{stage:"R16",vs:"vs Croatia",pct:71.0},{stage:"QF",vs:"vs Portugal",pct:52.7},{stage:"SF",vs:"vs Argentina",pct:30.7}]};
+  const THREAT={FRA:5,ESP:5,ARG:5,ENG:4,BRA:4,POR:4,GER:3,MAR:3,URU:2,NED:2,COL:2,JPN:2,BEL:2,CRO:2,SEN:1,USA:1};
 
-  // Final verdict banner
-  const champ = TEAMS[champion], runner = TEAMS[runnerUp];
-  const champWin = winProbs[0].pct;
-  const runnerWin = winProbs[1].pct;
-
-  // Key duel players
-  const duels = [
-    { a: PLAYER_DATA[champion]?.[0], b: PLAYER_DATA[runnerUp]?.[0], label:'ATTACK DUEL' },
-    { a: PLAYER_DATA[champion]?.[1], b: PLAYER_DATA[runnerUp]?.[1], label:'GK BATTLE' },
-    { a: PLAYER_DATA[champion]?.[2], b: PLAYER_DATA[runnerUp]?.[2], label:'MIDFIELD DUEL' },
-  ];
-
-  const duelsHtml = duels.filter(d => d.a && d.b).map(d => `
-    <div class="fvb-duel">
-      <div>
-        <div class="fvb-player-name">${d.a.name.split(' ').pop()}</div>
-        <div class="fvb-player-role">${champ.flag} ${d.a.role}</div>
+  const cardsHtml=top4.map((item,idx)=>{
+    const t=TEAMS[item.t]; if(!t) return "";
+    const pData=PDATA[item.t]||[];
+    const path=KO_PATH[item.t]||[];
+    const threat=THREAT[item.t]||3;
+    const winPct=(winProbs.find(w=>w.t===item.t)?.pct||0).toFixed(1);
+    const isChamp=item.t===champion;
+    const playersHtml=pData.slice(0,3).map(p=>`
+      <div class="verdict-player">
+        <div class="player-avatar" style="background:${p.col}22;color:${p.col};border:1.5px solid ${p.col}44">${p.init}</div>
+        <div class="player-details">
+          <div class="player-name">${p.name}</div>
+          <div class="player-club">${p.club}</div>
+          <div class="player-role-bar"><span class="player-role-label">${p.role}</span><span class="player-rating-pill" style="background:${p.col}20;color:${p.col}">${p.rating}</span></div>
+        </div>
       </div>
-      <div class="fvb-duel-vs">VS</div>
-      <div>
-        <div class="fvb-player-name">${d.b.name.split(' ').pop()}</div>
-        <div class="fvb-player-role">${runner.flag} ${d.b.role}</div>
+      <div class="player-desc">${p.desc}</div>`).join("");
+    const pathChips=path.map(s=>`<div class="path-chip"><span>vs ${s.vs.replace("vs ","")}</span><span class="chip-pct" style="color:${s.pct>=70?"var(--green)":s.pct>=50?"var(--amber)":"var(--red)"}">${s.pct}%</span></div>`).join("");
+    const threatDots=Array.from({length:5},(_,i)=>`<div class="threat-dot${i<threat?" active":""}" style="${i<threat?`background:${colors[Math.min(idx,3)]}`:``}"></div>`).join("");
+    return `<div class="verdict-card fade-in ${idx===0?"rank1":""}" style="animation-delay:${idx*.1}s">
+      <div class="verdict-card-header">
+        <div class="verdict-rank-badge" style="color:${colors[idx]}">${medals[idx]}</div>
+        <div class="verdict-flag">${t.flag}</div>
+        <div>
+          <div class="verdict-team-name" style="color:${colors[idx]}">${t.name}</div>
+          <div class="verdict-sf-pct" style="color:${colors[idx]}">${item.pct.toFixed(1)}% SF · ${winPct}% Title</div>
+          <div class="verdict-history">${t.history||""}</div>
+        </div>
+        ${isChamp?`<div style="font-size:20px;margin-left:auto">🏆</div>`:""}
       </div>
-      <div style="font-size:9px;color:var(--text3);border-left:1px solid var(--border);padding-left:8px;margin-left:4px;letter-spacing:.08em;font-family:'Barlow Condensed',sans-serif;font-weight:700">${d.label}</div>
-    </div>`).join('');
+      <div class="verdict-body">
+        <div class="verdict-label">🎯 Key Players</div>
+        <div class="verdict-players">${playersHtml}</div>
+        <div class="verdict-label">⚡ Why They Win</div>
+        <div class="verdict-why">${t.edge||""}</div>
+        <div class="verdict-label">🗺 Knockout Path</div>
+        <div class="verdict-path">${pathChips}</div>
+        <div class="threat-meter"><span class="threat-label">THREAT</span><div class="threat-dots">${threatDots}</div><span class="threat-val" style="color:${colors[idx]}">${["ELITE","HIGH","STRONG","REAL"][idx]}</span></div>
+      </div>
+    </div>`;
+  }).join("");
 
-  const finalBannerHtml = `
+  const dh=sfProbs[4], dhT=TEAMS[dh?.t];
+  const dhHtml=dh&&dhT?`<div class="dark-horse-strip fade-in"><div class="dh-icon">${dhT.flag}</div><div><div class="dh-title">🐎 DARK HORSE: ${dhT.name.toUpperCase()} — ${dh.pct.toFixed(1)}% SF PROBABILITY</div><div class="dh-body"><strong>${PDATA[dh.t]?.[0]?.name||dhT.players?.[0]||""}</strong>: ${dhT.edge||""}. Record: <strong>${dhT.record||""}</strong>.</div></div></div>`:"";
+
+  const wrapper=document.createElement("div");
+  wrapper.id="verdictSection"; wrapper.className="verdict-section";
+  wrapper.innerHTML=`
+    <h2 class="bw-section-h2">🏆 Simulation Verdict — Top 4 Analysis</h2>
     <div class="final-verdict-banner fade-in">
       <div class="fvb-title">⚡ SIMULATION VERDICT — THE FINAL</div>
-      <div class="fvb-body">
-        The 100,000-run simulation points to a <strong>${champ.flag} ${champ.name} vs ${runner.flag} ${runner.name}</strong> final — 
-        a rematch of <strong>Qatar 2022</strong>. ${champ.name} edge it at <strong>${champWin.toFixed(1)}%</strong> 
-        driven by ${PLAYER_DATA[champion]?.[0]?.name || 'their star player'}'s 
-        ${PLAYER_DATA[champion]?.[0]?.desc?.split('.')[0] || 'exceptional quality'}. 
-        ${runner.name}'s ${PLAYER_DATA[runnerUp]?.[1]?.name || 'goalkeeper'} 
-        (${PLAYER_DATA[runnerUp]?.[1]?.desc?.split('.')[0] || 'elite GK'}) 
-        keeps it at ${runnerWin.toFixed(1)}% — this is not a one-sided Final.
-        The margin across all 100,000 runs is <strong>${(champWin - runnerWin).toFixed(1)} percentage points</strong>. 
-        Expect a classic.
-      </div>
+      <div class="fvb-body">Predicted Final: <strong>${champ.flag} ${champ.name} vs ${runner.flag} ${runner.name}</strong>. ${champ.name} edge at <strong>${champWin.toFixed(1)}%</strong> — margin of <strong>${(champWin-runnerWin).toFixed(1)}pp</strong> across 100,000 runs.</div>
       <div class="fvb-duels">${duelsHtml}</div>
-    </div>`;
-
-  // Verdict cards for top 4
-  const verdictCardsHtml = top4.map((item, idx) => {
-    const t    = TEAMS[item.t];
-    const pData = PLAYER_DATA[item.t] || [];
-    const path  = KO_PATH[item.t] || [];
-    const threat = THREAT[item.t] || 3;
-    const medals = ['🥇','🥈','🥉','4️⃣'];
-    const colors  = ['var(--gold)','#a0aec0','#cd7f32','var(--blue2)'];
-    const winPct  = (winProbs.find(w => w.t === item.t)?.pct || 0).toFixed(1);
-    const isChamp = item.t === champion;
-
-    const playersHtml = pData.slice(0, 3).map(p => {
-      const threatDots = Array.from({length:5}, (_,i) => `
-        <div class="threat-dot ${i < Math.round(p.rating/20) ? 'active' : ''}" 
-             style="${i < Math.round(p.rating/20) ? `background:${p.color}` : ''}"></div>`).join('');
-      return `
-        <div class="verdict-player">
-          <div class="player-avatar" style="background:${p.color}20;color:${p.color};border:1px solid ${p.color}40">${p.initials}</div>
-          <div class="player-details">
-            <div class="player-name">${p.name}</div>
-            <div class="player-club">${p.club}</div>
-            <div class="player-role-bar">
-              <span class="player-role-label">${p.role}</span>
-              <span class="player-rating-pill" style="background:${p.color}20;color:${p.color}">${p.rating}</span>
-            </div>
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--text3);padding:0 4px 8px;line-height:1.55;margin-top:-4px">${p.desc}</div>`;
-    }).join('');
-
-    const pathChips = path.map(s => `
-      <div class="path-chip">
-        <span style="color:var(--text2)">vs ${s.vs}</span>
-        <span class="chip-pct" style="color:${s.pct >= 70 ? 'var(--neon)' : s.pct >= 50 ? 'var(--gold)' : 'var(--red)'}">${s.pct}%</span>
-      </div>`).join('');
-
-    const threatDots = Array.from({length:5}, (_,i) => `
-      <div class="threat-dot ${i < threat ? 'active' : ''}" 
-           style="${i < threat ? `background:${colors[Math.min(idx,3)]}` : ''}"></div>`).join('');
-
-    const whyWin = t.edge;
-
-    return `
-      <div class="verdict-card fade-in ${idx===0?'rank1':''}" style="animation-delay:${idx*.1}s">
-        <div class="verdict-card-header">
-          <div class="verdict-rank-badge" style="color:${colors[idx]}">${medals[idx]}</div>
-          <div class="verdict-flag">${t.flag}</div>
-          <div class="verdict-team-info">
-            <div class="verdict-team-name" style="color:${colors[idx]}">${t.name}</div>
-            <div class="verdict-sf-pct" style="color:${colors[idx]}">${item.pct.toFixed(1)}% SF · ${winPct}% Title</div>
-            <div class="verdict-history">${t.history}</div>
-          </div>
-          ${isChamp ? `<div style="font-size:22px;margin-left:auto">🏆</div>` : ''}
-        </div>
-        <div class="verdict-body">
-
-          <div class="verdict-label">🎯 Key Players</div>
-          <div class="verdict-players">${playersHtml}</div>
-
-          <div class="verdict-label">⚡ Why They Win</div>
-          <div class="verdict-why">${whyWin}</div>
-
-          <div class="verdict-label">🗺 Knockout Path</div>
-          <div class="verdict-path">${pathChips}</div>
-
-          <div class="threat-meter">
-            <span class="threat-label">TOURNAMENT THREAT</span>
-            <div class="threat-dots">${threatDots}</div>
-            <span class="threat-val" style="color:${colors[idx]}">${['ELITE','HIGH','STRONG','REAL'][idx]}</span>
-          </div>
-
-        </div>
-      </div>`;
-  }).join('');
-
-  // Dark horse callout
-  const dh = sfProbs[4]; // 5th team — biggest dark horse
-  const dhT = TEAMS[dh?.t];
-  const darkHorseHtml = dh ? `
-    <div class="dark-horse-strip fade-in">
-      <div class="dh-icon">${dhT.flag}</div>
-      <div>
-        <div class="dh-title">🐎 DARK HORSE WATCH: ${dhT.name.toUpperCase()} — ${dh.pct.toFixed(1)}% SF PROBABILITY</div>
-        <div class="dh-body">
-          ${dhT.name} sit just outside the top 4 but pose a real threat. 
-          <strong>${PLAYER_DATA[dh.t]?.[0]?.name || dhT.players[0]}</strong> 
-          (${PLAYER_DATA[dh.t]?.[0]?.desc?.split('.')[0] || 'elite quality'}).
-          Their path to the semi-finals requires one major upset — which is exactly what they've done before. 
-          Record: <strong>${dhT.record}</strong>. Watch closely.
-        </div>
-      </div>
-    </div>` : '';
-
-  const wrapper = document.createElement('div');
-  wrapper.id = 'verdictSection';
-  wrapper.className = 'verdict-section';
-  wrapper.innerHTML = `
-    <h3 class="subsection-title">🏆 Simulation Verdict — Top 4 Analysis</h3>
-    ${finalBannerHtml}
-    <div class="verdict-grid">${verdictCardsHtml}</div>
-    ${darkHorseHtml}`;
-
+    </div>
+    <div class="verdict-grid">${cardsHtml}</div>
+    ${dhHtml}`;
   anchor.appendChild(wrapper);
 }
-
-// ─── Hook into renderResults ───
-const _origRenderResults = renderResults;
-// Override renderResults to also call renderVerdicts
-window.renderResults = function(data) {
-  _origRenderResults(data);
-  renderVerdicts(data.sfProbs, data.winProbs);
-};
-
-// ═══════════════════════════════════════════════
-//  ASIAN HANDICAP — FULL TOURNAMENT ENGINE
-// ═══════════════════════════════════════════════
-
-let activeFilter = 'all';
-
-function renderOddsSection() {
-  renderAHSummary();
-  renderMatchCards('all');
-  setupAHFilters();
-  setupScrollReveal();
-}
-
-function renderAHSummary() {
-  const el = document.getElementById('ahSummary');
-  if (!el) return;
-  const counts = { strong:0, value:0, slight:0, avoid:0, neutral:0 };
-  MATCHES.forEach(m => { if(counts[m.rec]!==undefined) counts[m.rec]++; });
-  const totalEdge = MATCHES.filter(m=>m.edge>0).reduce((s,m)=>s+m.edge,0);
-  el.innerHTML = `
-    <div class="ah-sum-card" style="animation-delay:.05s"><div class="ah-sum-num" style="color:#22c55e">${counts.strong}</div><div class="ah-sum-label">Strong value</div></div>
-    <div class="ah-sum-card" style="animation-delay:.1s"><div class="ah-sum-num" style="color:#4ade80">${counts.value}</div><div class="ah-sum-label">Good value</div></div>
-    <div class="ah-sum-card" style="animation-delay:.15s"><div class="ah-sum-num" style="color:#facc15">${counts.slight}</div><div class="ah-sum-label">Slight edge</div></div>
-    <div class="ah-sum-card" style="animation-delay:.2s"><div class="ah-sum-num" style="color:#f97316">${counts.avoid}</div><div class="ah-sum-label">Avoid</div></div>
-    <div class="ah-sum-card" style="animation-delay:.25s"><div class="ah-sum-num" style="color:var(--text2)">${MATCHES.length}</div><div class="ah-sum-label">Matches tracked</div></div>`;
-}
-
-function setupAHFilters() {
-  document.querySelectorAll('.ah-filter-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.ah-filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeFilter = btn.dataset.filter;
-      renderMatchCards(activeFilter);
-    };
-  });
-}
-
-function renderMatchCards(filter) {
-  const el = document.getElementById('ahGrid');
-  if (!el) return;
-  el.innerHTML = '';
-
-  const list = filter === 'all' ? MATCHES :
-    filter === 'picks' ? MATCHES.filter(m => m.rec === 'strong' || m.rec === 'value') :
-    MATCHES.filter(m => m.rec === filter);
-
-  if (!list.length) {
-    el.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.06em">No matches in this category</div>`;
-    return;
-  }
-
-  // Group by stage
-  const byStage = {};
-  list.forEach(m => {
-    if (!byStage[m.stage]) byStage[m.stage] = [];
-    byStage[m.stage].push(m);
-  });
-
-  const stageOrder = ['GRP','R32','R16','QF','SF','F'];
-  const stageNames = { GRP:'Group Stage', R32:'Round of 32', R16:'Round of 16', QF:'Quarter-Finals', SF:'Semi-Finals', F:'The Final' };
-
-  let cardIdx = 0;
-  stageOrder.forEach(stageKey => {
-    if (!byStage[stageKey]) return;
-    const divider = document.createElement('div');
-    divider.className = 'stage-divider';
-    divider.style.animationDelay = (cardIdx * 0.04) + 's';
-    const stageIcon = {GRP:'⚽',R32:'🏆',R16:'⚡',QF:'🔥',SF:'💥',F:'🏅'}[stageKey] || '⚽';
-    divider.textContent = `${stageIcon} ${stageNames[stageKey] || stageKey}`;
-    if (stageKey !== 'GRP') {
-      const projBadge = document.createElement('span');
-      projBadge.style.cssText = 'font-size:9px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-family:\'Barlow Condensed\',sans-serif;font-weight:600;letter-spacing:.06em;margin-left:8px';
-      projBadge.textContent = 'PROJECTED LINE';
-      divider.appendChild(projBadge);
-    }
-    el.appendChild(divider);
-
-    byStage[stageKey].forEach((m, i) => {
-      el.appendChild(buildMatchCard(m, cardIdx++));
-    });
-  });
-
-  setupScrollReveal();
-}
-
-function buildMatchCard(m, idx) {
-  const cfg = REC_CONFIG[m.rec];
-  const wH = waterLabel(m.ah.homePayout);
-  const wA = waterLabel(m.ah.awayPayout);
-  const edgeColor = m.edge >= 10 ? '#22c55e' : m.edge >= 4 ? '#4ade80' : m.edge >= 0 ? '#facc15' : '#f97316';
-  const edgeBarW = Math.min(Math.abs(m.edge) * 3, 100);
-
-  // Build player avatars
-  const homePlayers = (m.homePlayers || []).flatMap(code => (KEY_PLAYERS[code] || []).slice(0,3));
-  const awayPlayers = (m.awayPlayers || []).flatMap(code => (KEY_PLAYERS[code] || []).slice(0,3));
-  const allPlayers = [...homePlayers, ...awayPlayers];
-
-  const avatarsHtml = allPlayers.map((p, i) => `
-    <div class="player-avatar-chip" style="animation-delay:${0.05+i*0.05}s">
-      <div class="av-circle" style="background:${p.col}22;color:${p.col};border:1.5px solid ${p.col}44;animation-delay:${i*0.06}s">
-        ${p.init}
-      </div>
-      <div>
-        <div class="av-name">${p.name}</div>
-        <div class="av-role">${p.role}</div>
-      </div>
-    </div>`).join('');
-
-  const playersRowHtml = allPlayers.length > 0 ? `
-    <div class="ah-players-row">
-      <span class="ah-players-label">KEY PLAYERS</span>
-      ${avatarsHtml}
-    </div>` : '';
-
-  const card = document.createElement('div');
-  card.className = `ah-card rec-${m.rec} spring-in`;
-  card.style.animationDelay = (idx * 0.06) + 's';
-
-  card.innerHTML = `
-    <div class="ah-card-header">
-      <div class="ah-stage-pill">${m.group?.replace('Group ','GRP-') || m.stage}</div>
-      <div class="ah-date-tag">${m.date}</div>
-      <div class="ah-matchup">
-        <div class="ah-team-block">
-          <span class="ah-flag">${m.homeFlag}</span>
-          <span class="ah-team-name">${m.home}</span>
-        </div>
-        <span class="ah-vs-sep">VS</span>
-        <div class="ah-team-block">
-          <span class="ah-flag">${m.awayFlag}</span>
-          <span class="ah-team-name">${m.away}</span>
-        </div>
-      </div>
-      <div class="ah-ml-tag">ML: ${m.homeML > 0 ? '+' : ''}${m.homeML} / ${m.awayML > 0 ? '+' : ''}${m.awayML}</div>
-    </div>
-
-    ${playersRowHtml}
-
-    <div class="ah-card-body">
-      <div class="ah-odds-panel">
-        <div class="ah-panel-label">Asian Handicap 让球盘</div>
-        <div class="ah-lines">
-          <div class="ah-line-box">
-            <div class="ah-line-team">${m.homeFlag} ${m.home}</div>
-            <div class="ah-handicap-val">${m.ah.homeLabel}</div>
-            <div class="ah-payout-val" style="color:${wH.col}">${m.ah.homePayout}</div>
-            <div class="ah-water-tag" style="color:${wH.col}">${wH.txt}</div>
-          </div>
-          <div class="ah-line-box">
-            <div class="ah-line-team">${m.awayFlag} ${m.away}</div>
-            <div class="ah-handicap-val">${m.ah.awayLabel}</div>
-            <div class="ah-payout-val" style="color:${wA.col}">${m.ah.awayPayout}</div>
-            <div class="ah-water-tag" style="color:${wA.col}">${wA.txt}</div>
-          </div>
-        </div>
-        <div class="ah-edge-row">
-          <span class="ah-edge-label">SIM COVER ${m.simCoverAH}% / MKT ${m.marketCoverAH}%</span>
-          <div class="ah-edge-bar">
-            <div class="ah-edge-fill" style="width:${edgeBarW}%;background:${edgeColor}"></div>
-          </div>
-          <span class="ah-edge-pct" style="color:${edgeColor}">${m.edge >= 0 ? '+' : ''}${m.edge}%</span>
-        </div>
-      </div>
-
-      <div class="ah-rec-panel">
-        <div class="ah-panel-label">Simulation Verdict</div>
-        <div class="ah-rec-badge" style="background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.border}">${m.recLabel}</div>
-        <div class="ah-rec-notes">${m.notes}</div>
-        <div class="ah-rec-detail">💡 ${m.recDetail}</div>
-      </div>
-    </div>`;
-
-  return card;
-}
-
-// Scroll-triggered spring animations
-function setupScrollReveal() {
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.style.animationPlayState = 'running';
-        obs.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.spring-in, .ah-sum-card').forEach(el => {
-    el.style.animationPlayState = 'paused';
-    obs.observe(el);
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  renderOddsSection();
-});

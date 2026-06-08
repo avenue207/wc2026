@@ -1,232 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WC 2026 · Semi-Final Predictor</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700;800;900&family=Barlow:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>WC 2026 · Match Odds & Predictor</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div class="noise"></div>
 
-  <!-- HERO -->
-  <header class="hero">
-    <div class="hero-bg">
-      <div class="pitch-lines"></div>
-      <div class="glow glow-1"></div>
-      <div class="glow glow-2"></div>
+<!-- ═══ BETWAY-STYLE HEADER ═══ -->
+<header class="bw-header">
+  <div class="bw-header-inner">
+    <div class="bw-logo">
+      <span class="bw-logo-icon">⚽</span>
+      <span class="bw-logo-text">WC<span>2026</span></span>
+      <span class="bw-logo-sub">PREDICTOR</span>
     </div>
-    <div class="hero-content">
-      <div class="eyebrow">
-        <span class="dot"></span>
-        FIFA World Cup 2026 · North America · Jun 11 – Jul 19
-        <span class="dot"></span>
-      </div>
-      <h1 class="hero-title">
-        <span class="title-line">Semi-Final</span>
-        <span class="title-line accent">Predictor</span>
-      </h1>
-      <p class="hero-sub">Monte Carlo Engine · 100,000 Simulations · Player Ratings × Form × Tournament DNA</p>
-      <button class="cta-btn" id="runBtn" onclick="runSimulation()">
-        <span class="btn-icon">▶</span>
-        <span class="btn-text">Run Simulation</span>
-        <span class="btn-shine"></span>
+    <nav class="bw-header-nav">
+      <a href="#matches" class="bw-hn-link" onclick="switchTab('matches',this)">Matches</a>
+      <a href="#odds"    class="bw-hn-link" onclick="switchTab('odds',this)">AH Odds</a>
+      <a href="#scorer"  class="bw-hn-link" onclick="switchTab('scorer',this)">Golden Boot</a>
+      <a href="#bracket" class="bw-hn-link" onclick="switchTab('bracket',this)">Bracket</a>
+      <a href="#sim"     class="bw-hn-link" onclick="switchTab('sim',this)">Simulation</a>
+    </nav>
+    <button class="bw-sim-btn" id="runBtn" onclick="runSimulation()">
+      <span id="runBtnText">▶ Run Simulation</span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══ SPORT SUB-NAV ═══ -->
+<div class="bw-subnav">
+  <div class="bw-subnav-inner">
+    <span class="bw-breadcrumb">Football</span>
+    <span class="bw-bc-sep">›</span>
+    <span class="bw-breadcrumb">World Cup 2026</span>
+    <span class="bw-bc-sep">›</span>
+    <span class="bw-breadcrumb active" id="breadcrumbActive">Matches</span>
+    <div class="bw-subnav-pills">
+      <button class="bw-pill active" onclick="switchTab('matches',this)" data-tab="matches">Upcoming Matches</button>
+      <button class="bw-pill" onclick="switchTab('odds',this)"   data-tab="odds">AH Odds</button>
+      <button class="bw-pill" onclick="switchTab('scorer',this)" data-tab="scorer">🏅 Golden Boot</button>
+      <button class="bw-pill" onclick="switchTab('bracket',this)" data-tab="bracket">Bracket</button>
+      <button class="bw-pill" onclick="switchTab('sim',this)"    data-tab="sim" id="simPill">
+        Simulation <span class="bw-pill-badge" id="simBadge" style="display:none">✓</span>
       </button>
     </div>
-    <div class="scroll-hint">↓ Scroll to explore</div>
-  </header>
+  </div>
+</div>
 
-  <!-- NAV -->
-  <nav class="sticky-nav" id="stickyNav">
-    <div class="nav-inner">
-      <a href="#squads"   class="nav-link active" onclick="setActive(this)">Squad Ratings</a>
-      <a href="#odds" class="nav-link" onclick="setActive(this)">AH Odds</a>
-      <a href="#h2h"      class="nav-link"         onclick="setActive(this)">Head-to-Head</a>
-      <a href="#bracket"  class="nav-link"         onclick="setActive(this)">Bracket</a>
-      <a href="#results"  class="nav-link" id="resultsNavLink" onclick="setActive(this)">
-        Results <span class="nav-badge" id="navBadge" style="display:none">✓</span>
-      </a>
-      <a href="#final"    class="nav-link"         onclick="setActive(this)">Final & Champion</a>
-    </div>
-  </nav>
+<!-- ═══ MAIN LAYOUT ═══ -->
+<div class="bw-layout">
 
-  <main>
+  <!-- SIDEBAR -->
+  <aside class="bw-sidebar">
+    <div class="bw-sb-title">Tournament</div>
+    <a class="bw-sb-link active">⚽ All Matches</a>
+    <a class="bw-sb-link" onclick="filterStage('GRP')">Group Stage</a>
+    <a class="bw-sb-link" onclick="filterStage('R16')">Round of 16</a>
+    <a class="bw-sb-link" onclick="filterStage('QF')">Quarter-Finals</a>
+    <a class="bw-sb-link" onclick="filterStage('SF')">Semi-Finals</a>
+    <a class="bw-sb-link" onclick="filterStage('F')">The Final</a>
 
-    <!-- SQUADS -->
-    <section id="squads" class="section">
-      <div class="section-header">
-        <div class="section-number">01</div>
+    <div class="bw-sb-divider"></div>
+    <div class="bw-sb-title">Simulation</div>
+    <a class="bw-sb-link" onclick="switchTab('sim',null)">SF Probability</a>
+    <a class="bw-sb-link" onclick="switchTab('sim',null)">Final Prediction</a>
+    <a class="bw-sb-link" onclick="switchTab('sim',null)">Champion Pick</a>
+
+    <div class="bw-sb-divider"></div>
+    <div class="bw-sb-title">Markets</div>
+    <a class="bw-sb-link" onclick="switchTab('odds',null)">Asian Handicap</a>
+    <a class="bw-sb-link" onclick="switchTab('scorer',null)">Top Goalscorer</a>
+    <a class="bw-sb-link" onclick="switchTab('bracket',null)">Head-to-Head</a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="bw-main">
+
+    <!-- ── MATCHES TAB ── -->
+    <section id="tab-matches" class="bw-tab active">
+      <div class="bw-content-header">
         <div>
-          <h2 class="section-title">Squad Ratings</h2>
-          <p class="section-desc">Player quality sourced from 2024–25 club season. Every stat is individually weighted. Click any card to open Head-to-Head analysis.</p>
+          <h1 class="bw-content-title">Matches · World Cup 2026</h1>
+          <p class="bw-content-sub">Win/Draw/Win odds + Asian Handicap lines + Simulation edge</p>
+        </div>
+        <div class="bw-legend">
+          <span class="bw-leg bw-leg-strong">Strong</span>
+          <span class="bw-leg bw-leg-value">Value</span>
+          <span class="bw-leg bw-leg-slight">Slight</span>
+          <span class="bw-leg bw-leg-avoid">Avoid</span>
         </div>
       </div>
-      <div class="teams-grid" id="teamsGrid"></div>
+      <!-- Column headers -->
+      <div class="bw-col-header">
+        <div class="bw-ch-time">Time</div>
+        <div class="bw-ch-teams">Match</div>
+        <div class="bw-ch-wdw">Win / Draw / Win</div>
+        <div class="bw-ch-ah">Asian Handicap</div>
+        <div class="bw-ch-sim">Sim Edge</div>
+        <div class="bw-ch-more"></div>
+      </div>
+      <div id="matchList"></div>
     </section>
 
-
-    <!-- ASIAN HANDICAP ODDS -->
-    <section id="odds" class="section section-alt">
-      <div class="section-header">
-        <div class="section-number">02</div>
+    <!-- ── AH ODDS TAB ── -->
+    <section id="tab-odds" class="bw-tab">
+      <div class="bw-content-header">
         <div>
-          <h2 class="section-title">Asian Handicap Odds</h2>
-          <p class="section-desc">Live 让球盘 lines + 水位 (payout rates) from Bet365, Pinnacle & William Hill — cross-referenced against 100,000-run simulation to find value bets. Updated pre-tournament Jun 8 2026.</p>
+          <h1 class="bw-content-title">Asian Handicap Odds</h1>
+          <p class="bw-content-sub">让球盘 lines vs simulation cover probability · Group → Final</p>
         </div>
       </div>
-
-      <div class="ah-header-bar">
-        <span class="ah-source-badge">📊 Bet365</span>
-        <span class="ah-source-badge">📊 William Hill</span>
-        <span class="ah-source-badge">📊 FanDuel</span>
-        <span class="ah-source-badge">📊 Oddschecker</span>
-        <span class="ah-update-time">⟳ Updated Jun 8 2026 · 12 group stage matches</span>
+      <div class="bw-filter-row" id="ahFilterRow">
+        <button class="bw-filter active" data-f="all" onclick="filterAH(this)">All</button>
+        <button class="bw-filter" data-f="picks" onclick="filterAH(this)">🔥 Best Picks</button>
+        <button class="bw-filter" data-f="strong" onclick="filterAH(this)">Strong Value</button>
+        <button class="bw-filter" data-f="value" onclick="filterAH(this)">Good Value</button>
+        <button class="bw-filter" data-f="avoid" onclick="filterAH(this)">Avoid</button>
       </div>
-
-      <div id="ahSummary" class="ah-summary-strip"></div>
-
-      <div class="ah-filter-row">
-        <button class="ah-filter-btn active" data-filter="all">All Matches</button>
-        <button class="ah-filter-btn" data-filter="picks">🔥 Best Picks</button>
-        <button class="ah-filter-btn" data-filter="strong">💎 Strong Value</button>
-        <button class="ah-filter-btn" data-filter="value">✅ Good Value</button>
-        <button class="ah-filter-btn" data-filter="slight">⚠️ Slight Edge</button>
-        <button class="ah-filter-btn" data-filter="avoid">❌ Avoid</button>
+      <div class="bw-ah-col-header">
+        <div>Match</div>
+        <div>AH Line</div>
+        <div>水位 Payout</div>
+        <div>Sim Cover</div>
+        <div>Market</div>
+        <div>Edge</div>
+        <div>Verdict</div>
       </div>
-
-      <div class="ah-grid" id="ahGrid"></div>
-
-      <div class="ah-disclaimer">
-        ⚠️ <strong>Disclaimer:</strong> All odds and handicap lines are sourced from public bookmakers and are subject to change before kickoff. 水位 (payout rates) shown are pre-match estimates. Asian Handicap "cover probability" is derived from the simulation model and carries model uncertainty. This analysis is for informational and entertainment purposes only. Bet responsibly. Never bet more than you can afford to lose.
-      </div>
+      <div id="ahTableBody"></div>
     </section>
 
-    <!-- HEAD TO HEAD -->
-    <section id="h2h" class="section section-alt">
-      <div class="section-header">
-        <div class="section-number">03</div>
+    <!-- ── GOLDEN BOOT TAB ── -->
+    <section id="tab-scorer" class="bw-tab">
+      <div class="bw-content-header">
         <div>
-          <h2 class="section-title">Head-to-Head Analysis</h2>
-          <p class="section-desc">Select any two teams to see a full statistical breakdown and simulated win probability.</p>
+          <h1 class="bw-content-title">Golden Boot · Top Goalscorer 2026</h1>
+          <p class="bw-content-sub">Odds from Bet365 · Simulation team depth score · Player profile</p>
         </div>
       </div>
+      <div id="scorerGrid"></div>
+    </section>
 
-      <!-- Team Selectors -->
+    <!-- ── BRACKET TAB ── -->
+    <section id="tab-bracket" class="bw-tab">
+      <div class="bw-content-header">
+        <div>
+          <h1 class="bw-content-title">Bracket · Head-to-Head</h1>
+          <p class="bw-content-sub">Select any two teams for a full stat breakdown and simulated win probability</p>
+        </div>
+      </div>
       <div class="h2h-selectors">
         <div class="h2h-selector-wrap">
-          <label class="selector-label">TEAM A</label>
-          <div class="team-selector" id="selectorA">
-            <div class="selector-grid" id="selectorGridA"></div>
-          </div>
+          <label class="bw-label">TEAM A</label>
+          <div class="team-selector"><div class="selector-grid" id="selectorGridA"></div></div>
         </div>
         <div class="h2h-vs-center">
           <div class="h2h-vs-badge">VS</div>
-          <button class="swap-btn" onclick="swapTeams()" title="Swap teams">⇄</button>
+          <button class="swap-btn" onclick="swapTeams()">⇄</button>
         </div>
         <div class="h2h-selector-wrap">
-          <label class="selector-label">TEAM B</label>
-          <div class="team-selector" id="selectorB">
-            <div class="selector-grid" id="selectorGridB"></div>
+          <label class="bw-label">TEAM B</label>
+          <div class="team-selector"><div class="selector-grid" id="selectorGridB"></div></div>
+        </div>
+      </div>
+      <div class="h2h-panel" id="h2hPanel">
+        <div class="h2h-empty">Select two teams to see the full analysis</div>
+      </div>
+      <div class="bw-bracket-section">
+        <h2 class="bw-section-h2">R16 Bracket Paths</h2>
+        <div class="bracket-layout">
+          <div class="bracket-half">
+            <div class="bracket-half-label left">◀ Left Bracket · SF1</div>
+            <div id="bracketLeft"></div>
+          </div>
+          <div class="bracket-center">
+            <div class="sf-node"><div class="sf-label">SF 1</div></div>
+            <div class="trophy-center">⚽</div>
+            <div class="sf-node"><div class="sf-label">SF 2</div></div>
+          </div>
+          <div class="bracket-half">
+            <div class="bracket-half-label right">Right Bracket · SF2 ▶</div>
+            <div id="bracketRight"></div>
           </div>
         </div>
       </div>
-
-      <!-- H2H Panel -->
-      <div class="h2h-panel" id="h2hPanel"></div>
     </section>
 
-    <!-- BRACKET -->
-    <section id="bracket" class="section">
-      <div class="section-header">
-        <div class="section-number">04</div>
+    <!-- ── SIMULATION TAB ── -->
+    <section id="tab-sim" class="bw-tab">
+      <div class="bw-content-header">
         <div>
-          <h2 class="section-title">Bracket Paths</h2>
-          <p class="section-desc">Realistic 2026 draw seedings. Base win % from strength differential before simulation noise.</p>
+          <h1 class="bw-content-title">Simulation Results</h1>
+          <p class="bw-content-sub">100,000 tournament runs · Monte Carlo · Player-weighted model</p>
         </div>
+        <button class="bw-sim-btn" onclick="runSimulation()">▶ Run Again</button>
       </div>
-      <div class="bracket-layout">
-        <div class="bracket-half bracket-left">
-          <div class="bracket-half-label left">◀ Left Bracket · Semi-Final 1</div>
-          <div id="bracketLeft"></div>
-        </div>
-        <div class="bracket-center">
-          <div class="sf-node sf-node-1"><div class="sf-label">SF 1</div></div>
-          <div class="trophy-center">⚽</div>
-          <div class="sf-node sf-node-2"><div class="sf-label">SF 2</div></div>
-        </div>
-        <div class="bracket-half bracket-right">
-          <div class="bracket-half-label right">Right Bracket · Semi-Final 2 ▶</div>
-          <div id="bracketRight"></div>
-        </div>
+      <div id="simPlaceholder" class="bw-sim-placeholder">
+        <div class="bw-sim-ph-icon">⚽</div>
+        <div class="bw-sim-ph-title">Ready to simulate</div>
+        <p class="bw-sim-ph-desc">Click Run Simulation to process 100,000 tournament runs</p>
+        <button class="bw-sim-btn" onclick="runSimulation()">▶ Run Simulation</button>
       </div>
-    </section>
-
-    <!-- RESULTS -->
-    <section id="results" class="section section-alt">
-      <div class="section-header">
-        <div class="section-number">05</div>
+      <div id="simResults" style="display:none">
+        <div class="bw-sim-grid">
+          <div>
+            <h2 class="bw-section-h2">Semi-Final Qualification %</h2>
+            <div id="sfProbGrid"></div>
+          </div>
+          <div>
+            <h2 class="bw-section-h2">Most Likely SF Matchups</h2>
+            <div class="matchup-grid" id="matchupGrid"></div>
+          </div>
+        </div>
+        <div id="finalStage" class="final-stage"></div>
+        <div id="championStage" class="champion-stage"></div>
         <div>
-          <h2 class="section-title">Simulation Results</h2>
-          <p class="section-desc">Semi-final qualification probability across 100,000 tournament runs.</p>
-        </div>
-      </div>
-      <div id="resultsPlaceholder" class="results-placeholder">
-        <div class="placeholder-icon">⚽</div>
-        <div class="placeholder-title">Simulation not yet run</div>
-        <p class="placeholder-desc">Hit Run Simulation above to process 100,000 full tournament runs.</p>
-        <button class="cta-btn cta-sm" onclick="runSimulation()">▶ Run Simulation</button>
-      </div>
-      <div id="resultsContent" style="display:none">
-        <div class="sf-prob-grid" id="sfProbGrid"></div>
-        <div class="matchup-section">
-          <h3 class="subsection-title">Most Likely Semi-Final Matchups</h3>
-          <div class="matchup-grid" id="matchupGrid"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FINAL -->
-    <section id="final" class="section">
-      <div class="section-header">
-        <div class="section-number">06</div>
-        <div>
-          <h2 class="section-title">Final & Champion</h2>
-          <p class="section-desc">The simulation's predicted World Cup Final and trophy winner.</p>
-        </div>
-      </div>
-      <div id="finalPlaceholder" class="results-placeholder">
-        <div class="placeholder-icon">🏆</div>
-        <div class="placeholder-title">Run the simulation first</div>
-        <button class="cta-btn cta-sm" onclick="runSimulation()">▶ Run Simulation</button>
-      </div>
-      <div id="finalContent" style="display:none">
-        <div class="final-stage"  id="finalStage"></div>
-        <div class="champion-stage" id="championStage"></div>
-        <div class="win-table-wrap">
-          <h3 class="subsection-title">All Teams — World Cup Win Probability</h3>
+          <h2 class="bw-section-h2">All Teams — Tournament Win %</h2>
           <div id="winTable"></div>
         </div>
+        <div id="verdictSection"></div>
       </div>
     </section>
 
   </main>
+</div>
 
-  <footer class="footer">
-    <div class="footer-inner">
-      <span>WC2026 Predictor</span>
-      <span class="footer-sep">·</span>
-      <span>Monte Carlo Simulation</span>
-      <span class="footer-sep">·</span>
-      <span>100,000 runs per session</span>
-    </div>
-  </footer>
+<!-- FOOTER -->
+<footer class="bw-footer">
+  <div class="bw-footer-inner">
+    <span>⚽ WC2026 Predictor</span>
+    <span class="bw-ft-sep">·</span>
+    <span>Monte Carlo Simulation · 100,000 runs</span>
+    <span class="bw-ft-sep">·</span>
+    <span>Odds: Bet365 / FanDuel / William Hill · Jun 2026</span>
+    <span class="bw-ft-sep">·</span>
+    <span style="color:#f59e0b">⚠ For entertainment only · Bet responsibly</span>
+  </div>
+</footer>
 
-  <script src="odds.js"></script>
-  <script src="data.js"></script>
-  <script src="sim.js"></script>
-  <script src="ui.js"></script>
+<script src="odds.js"></script>
+<script src="data.js"></script>
+<script src="sim.js"></script>
+<script src="ui.js"></script>
 </body>
 </html>
