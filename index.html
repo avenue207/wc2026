@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>WC 2026 · Match Odds & Predictor</title>
+<title>FIFA World Cup 2026 · Match Odds & Predictor</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet"/>
@@ -15,8 +15,8 @@
 <header class="bw-header">
   <div class="bw-header-inner">
     <div class="bw-logo">
-      <span class="bw-logo-icon">⚽</span>
-      <span class="bw-logo-text">WC<span>2026</span></span>
+      <img src="wc2026-logo.jpg" alt="FIFA World Cup 2026" class="bw-logo-emblem">
+      <span class="bw-logo-text">FIFA World Cup <span>2026</span></span>
       <span class="bw-logo-sub">PREDICTOR</span>
     </div>
   </div>
@@ -161,12 +161,15 @@
         </div>
       </div>
       <div id="simPlaceholder" class="bw-sim-placeholder">
-        <div class="bw-sim-ph-icon">⚽</div>
+        <div class="bw-sim-ph-icon"><img src="trophy.jpg" alt="FIFA World Cup Trophy" style="height:90px;width:auto;object-fit:contain"/></div>
         <div class="bw-sim-ph-title">Ready to simulate</div>
         <p class="bw-sim-ph-desc">Click Run Simulation to process 100,000 tournament runs</p>
         <button class="bw-sim-btn" onclick="runSimulation()">▶ Run Simulation</button>
       </div>
       <div id="simResults" style="display:none">
+        <div style="display:flex;justify-content:flex-end;padding:12px 0 0">
+          <button class="bw-sim-btn" onclick="runSimulation()">↺ Run Again</button>
+        </div>
         <div class="bw-sim-grid">
           <div>
             <h2 class="bw-section-h2">Semi-Final Qualification %</h2>

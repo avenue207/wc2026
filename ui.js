@@ -105,6 +105,39 @@ function renderMatches() {
   }
 }
 
+// ═══════════════════════════════════════════════
+//  SCORE PREDICTION — ATK/DEF model + WDW odds
+// ═══════════════════════════════════════════════
+function predictScore(m) {
+  const wdw = (typeof WDW_ODDS !== "undefined" && WDW_ODDS[m.id]) || [2.0,3.3,3.7];
+  const pH=1/wdw[0], pA=1/wdw[2], vig=pH+1/wdw[1]+pA;
+  const normH=pH/vig, normA=pA/vig;
+  const sH=(typeof TEAMS!=="undefined")&&TEAMS[m.homeCode]&&TEAMS[m.homeCode].stats;
+  const sA=(typeof TEAMS!=="undefined")&&TEAMS[m.awayCode]&&TEAMS[m.awayCode].stats;
+  const base=1.3, avg=78;
+  let xGH,xGA;
+  if(sH&&sA){
+    xGH=base*(sH.atk/avg)*(avg/sA.def)*(0.7+sH.form/100*0.6);
+    xGA=base*(sA.atk/avg)*(avg/sH.def)*(0.7+sA.form/100*0.6);
+  } else if(sH&&!sA){
+    const r=Math.min(20,normH/Math.max(0.04,normA));
+    xGH=base*(sH.atk/avg)*Math.min(2.2,1+(r-1)*0.06);
+    xGA=base*0.45/Math.min(1.8,sH.def/avg);
+  } else if(!sH&&sA){
+    const r=Math.min(20,normA/Math.max(0.04,normH));
+    xGH=base*0.45/Math.min(1.8,sA.def/avg);
+    xGA=base*(sA.atk/avg)*Math.min(2.2,1+(r-1)*0.06);
+  } else {
+    xGH=2.2*normH/(normH+normA);
+    xGA=2.2*normA/(normH+normA);
+  }
+  xGH=Math.max(0.25,Math.min(6,xGH));
+  xGA=Math.max(0.10,Math.min(4,xGA));
+  const gH=Math.round(xGH), gA=Math.round(xGA), total=gH+gA;
+  return {gH, gA, total, isBig:total>=3, xGH:xGH.toFixed(1), xGA:xGA.toFixed(1)};
+}
+
+
 function buildMatchRow(m, idx) {
   const wdw = WDW_ODDS[m.id] || [2.10, 3.30, 3.70];
   const wH = waterLabel(m.ah.homePayout), wA = waterLabel(m.ah.awayPayout);
@@ -119,8 +152,13 @@ function buildMatchRow(m, idx) {
       "<span class='bw-date-sm'>" + (m.stage !== "GRP" ? "Proj" : (m.group||"").replace("Group ","Grp-")) + "</span>" +
     "</div>" +
     "<div class='bw-teams-col'>" +
-      "<div class='bw-team-row'><span class='bw-team-flag'>" + m.homeFlag + "</span><span class='bw-team-name fav'>" + m.home + "</span></div>" +
-      "<div class='bw-team-row' style='margin-top:2px'><span class='bw-team-flag'>" + m.awayFlag + "</span><span class='bw-team-name'>" + m.away + "</span></div>" +
+      "<div class='bw-team-row'>" + flagImg(m.homeCode||m.home,"sm") + " <span class='bw-team-name fav'>" + m.home + "</span></div>" +
+      "<div class='bw-team-row' style='margin-top:2px'>" + flagImg(m.awayCode||m.away,"sm") + " <span class='bw-team-name'>" + m.away + "</span></div>" +
+      (function(){var sc=predictScore(m);return "<div class='bw-score-pred'>"
+        +"<span class='bw-score-val'>"+sc.gH+" - "+sc.gA+"</span>"
+        +"<span class='bw-total "+(sc.isBig?"bw-total-big":"bw-total-small")+"'>"
+        +(sc.isBig?"⬆ BIG (3+)":"⬇ SMALL (≤2)")+"</span>"
+        +"<span class='bw-xg-tag'>xG "+sc.xGH+"/"+sc.xGA+"</span></div>";})() +
     "</div>" +
     "<div class='bw-wdw'>" +
       "<button class='bw-odds-btn' onclick='this.classList.toggle(\"selected\")'><span class='bw-odds-label'>Home</span>" + wdw[0].toFixed(2) + "</button>" +

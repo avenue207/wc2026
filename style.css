@@ -428,3 +428,13 @@ a{text-decoration:none;color:inherit}button{font-family:inherit;cursor:pointer}
 }
 .bw-photo-flag-badge .pf-flag { font-size:16px; line-height:1; }
 .bw-photo-flag-badge .pf-name { font-family:'DM Sans',sans-serif; font-size:11px; }
+
+/* ══ SCORE PREDICTION ══ */
+.bw-score-pred{display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:5px;border-top:1px solid var(--border);flex-wrap:wrap}
+.bw-score-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--text);letter-spacing:.04em}
+.bw-total{font-size:9px;font-weight:800;padding:2px 7px;border-radius:100px;letter-spacing:.04em;flex-shrink:0}
+.bw-total-big{background:#fef3c7;color:#b45309;border:1px solid #fde68a}
+.bw-total-small{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.bw-xg-tag{font-size:9px;color:var(--text3);font-style:italic}
+
+.bw-logo-emblem{height:38px;width:auto;display:block;object-fit:contain;border-radius:6px;background:#fff;padding:3px 5px}
