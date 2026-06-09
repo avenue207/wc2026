@@ -65,10 +65,8 @@ function runOneTournament() {
 
 // Run full Monte Carlo simulation
 function runSimulation() {
-  const btn = document.getElementById('runBtn');
-  btn.classList.add('running');
-  const btnSpan = document.getElementById('runBtnText'); if (btnSpan) btnSpan.textContent = 'Simulating…';
-  btn.disabled = true;
+  // Disable all sim buttons while running
+  document.querySelectorAll('.bw-sim-btn').forEach(b => { b.disabled = true; b.style.opacity = '0.6'; });
 
   // Use setTimeout to allow UI to update before heavy computation
   setTimeout(() => {
@@ -136,9 +134,7 @@ function runSimulation() {
     // Render
     window.renderResults(results);
 
-    // Update button
-    btn.classList.remove('running');
-    const s2 = document.getElementById('runBtnText'); if(s2) s2.textContent = '✓ Re-run Simulation';
-    btn.disabled = false;
+    // Re-enable all sim buttons
+    document.querySelectorAll('.bw-sim-btn').forEach(b => { b.disabled = false; b.style.opacity = '1'; });
   }, 80);
 }
