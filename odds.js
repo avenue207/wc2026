@@ -41,7 +41,7 @@ const MATCHES = [
     ah:{ line:-1.25, homeLabel:"MEX -1.25", awayLabel:"RSA +1.25", homePayout:1.85, awayPayout:1.95 },
     simHomeWin:74, simCoverAH:26, marketCoverAH:51, edge:-25,
     notes:"Mexico 74% to win at home Azteca but -1 cover needs 2+ goals. High crowd energy but margin uncertain.",
-    rec:"avoid", recLabel:"❌ Avoid this AH", recDetail:"-25% negative edge — handicap too demanding. Back the underdog +line instead." },
+    rec:"strong", recLabel:"🔥 Back RSA +1.25", recDetail:"Underdog covers 74% — strong value taking RSA +1.25." },
 
   { id:"A2", stage:"GRP", date:"Jun 11", group:"Group A", venue:"Guadalajara",
     home:"Korea Republic", homeFlag:"🇰🇷", homeCode:"KOR",
@@ -50,7 +50,7 @@ const MATCHES = [
     ah:{ line:0, homeLabel:"KOR 0", awayLabel:"CZE 0", homePayout:1.9, awayPayout:1.9 },
     simHomeWin:44, simCoverAH:44, marketCoverAH:50, edge:-6,
     notes:"Balanced match. Czechia slight sim edge. DNB at 0 — draw refunds stake.",
-    rec:"slight", recLabel:"KOR ML safer than AH", recDetail:"-6% — cover 44% under breakeven. Prefer the moneyline." },
+    rec:"value", recLabel:"✓ Back CZE 0", recDetail:"Underdog covers 56% of the time — value on CZE 0." },
 
   { id:"C1", stage:"GRP", date:"Jun 13", group:"Group C", venue:"East Rutherford NJ",
     home:"Brazil", homeFlag:"🇧🇷", homeCode:"BRA", homePlayers:["BRA"],
@@ -59,7 +59,7 @@ const MATCHES = [
     ah:{ line:-0.75, homeLabel:"BRA -0.75", awayLabel:"MAR +0.75", homePayout:1.88, awayPayout:1.92 },
     simHomeWin:70, simCoverAH:39, marketCoverAH:51, edge:-12,
     notes:"Morocco DEF 89 + Bounou GK 87 = elite defensive block. Brazil 70% win but only 44% to win by 2+.",
-    rec:"avoid", recLabel:"❌ Avoid this AH", recDetail:"-12% negative edge — handicap too demanding. Back the underdog +line instead." },
+    rec:"strong", recLabel:"🔥 Back MAR +0.75", recDetail:"Underdog covers 61% — strong value taking MAR +0.75." },
 
   { id:"D1", stage:"GRP", date:"Jun 12", group:"Group D", venue:"Los Angeles",
     home:"USA", homeFlag:"🇺🇸", homeCode:"USA", homePlayers:["USA"],
@@ -68,7 +68,7 @@ const MATCHES = [
     ah:{ line:-0.5, homeLabel:"USA -0.5", awayLabel:"PAR +0.5", homePayout:1.8, awayPayout:2.05 },
     simHomeWin:51, simCoverAH:49, marketCoverAH:53, edge:-4,
     notes:"USA co-host home advantage vs Paraguay's CONMEBOL quality. Very tight. DNB returns stake on draw.",
-    rec:"slight", recLabel:"USA ML safer than AH", recDetail:"-4% — cover 49% under breakeven. Prefer the moneyline." },
+    rec:"slight", recLabel:"Lean PAR +0.5", recDetail:"Sim cover 51% for PAR +line — marginal edge to the underdog." },
 
   { id:"E1", stage:"GRP", date:"Jun 14", group:"Group E", venue:"Houston",
     home:"Germany", homeFlag:"🇩🇪", homeCode:"GER", homePlayers:["GER"],
@@ -77,7 +77,7 @@ const MATCHES = [
     ah:{ line:-3.25, homeLabel:"GER -3.25", awayLabel:"CUR +3.25", homePayout:1.85, awayPayout:1.95 },
     simHomeWin:97, simCoverAH:31, marketCoverAH:51, edge:-20,
     notes:"Germany 97% win probability. Wirtz + Musiala vs WC +17,500 longshots. Win by 3+ is 72% likely.",
-    rec:"avoid", recLabel:"❌ Avoid this AH", recDetail:"-20% negative edge — handicap too demanding. Back the underdog +line instead." },
+    rec:"strong", recLabel:"🔥 Back CUR +3.25", recDetail:"Underdog covers 69% — strong value taking CUR +3.25." },
 
   { id:"F1", stage:"GRP", date:"Jun 14", group:"Group F", venue:"Dallas",
     home:"Netherlands", homeFlag:"🇳🇱", homeCode:"NED", homePlayers:["NED"],
@@ -86,7 +86,7 @@ const MATCHES = [
     ah:{ line:-0.5, homeLabel:"NED -0.5", awayLabel:"JPN +0.5", homePayout:1.88, awayPayout:1.92 },
     simHomeWin:54, simCoverAH:44, marketCoverAH:51, edge:-7,
     notes:"NED 54% win. Van Dijk + Gakpo elite form. Japan giant-killers but NED width causes problems.",
-    rec:"slight", recLabel:"NED ML safer than AH", recDetail:"-7% — cover 44% under breakeven. Prefer the moneyline." },
+    rec:"value", recLabel:"✓ Back JPN +0.5", recDetail:"Underdog covers 56% of the time — value on JPN +0.5." },
 
   { id:"G1", stage:"GRP", date:"Jun 15", group:"Group G", venue:"Seattle",
     home:"Belgium", homeFlag:"🇧🇪", homeCode:"BEL", homePlayers:["BEL"],
@@ -113,7 +113,7 @@ const MATCHES = [
     ah:{ line:-2.75, homeLabel:"ESP -2.75", awayLabel:"CPV +2.75", homePayout:1.8, awayPayout:2.05 },
     simHomeWin:60, simCoverAH:27, marketCoverAH:53, edge:-26,
     notes:"Uruguay (Valverde, Núñez, Araújo) 60% win. -0.5 = just need Uruguay to win. Thin payout.",
-    rec:"avoid", recLabel:"❌ Avoid this AH", recDetail:"-26% negative edge — handicap too demanding. Back the underdog +line instead." },
+    rec:"strong", recLabel:"🔥 Back CPV +2.75", recDetail:"Underdog covers 73% — strong value taking CPV +2.75." },
 
   { id:"I1", stage:"GRP", date:"Jun 16", group:"Group I", venue:"East Rutherford NJ",
     home:"France", homeFlag:"🇫🇷", homeCode:"FRA", homePlayers:["FRA"],
@@ -122,7 +122,7 @@ const MATCHES = [
     ah:{ line:-1.25, homeLabel:"FRA -1.25", awayLabel:"SEN +1.25", homePayout:1.9, awayPayout:1.9 },
     simHomeWin:72, simCoverAH:33, marketCoverAH:50, edge:-17,
     notes:"France ATK 94 + Mbappé speed vs Mendy GK 83. 72% win, 55% to cover -1 (win by 2+).",
-    rec:"avoid", recLabel:"❌ Avoid this AH", recDetail:"-17% negative edge — handicap too demanding. Back the underdog +line instead." },
+    rec:"strong", recLabel:"🔥 Back SEN +1.25", recDetail:"Underdog covers 67% — strong value taking SEN +1.25." },
 
   { id:"J1", stage:"GRP", date:"Jun 17", group:"Group J", venue:"Miami",
     home:"Argentina", homeFlag:"🇦🇷", homeCode:"ARG", homePlayers:["ARG"],
@@ -131,7 +131,7 @@ const MATCHES = [
     ah:{ line:-1.5, homeLabel:"ARG -1.5", awayLabel:"ALG +1.5", homePayout:1.88, awayPayout:1.92 },
     simHomeWin:78, simCoverAH:34, marketCoverAH:51, edge:-17,
     notes:"Messi's final WC opener. Argentina EXP 96, ATK 93. -1.5 cover 57% probable. Maximum motivation.",
-    rec:"avoid", recLabel:"❌ Avoid this AH", recDetail:"-17% negative edge — handicap too demanding. Back the underdog +line instead." },
+    rec:"strong", recLabel:"🔥 Back ALG +1.5", recDetail:"Underdog covers 66% — strong value taking ALG +1.5." },
 
   { id:"K1", stage:"GRP", date:"Jun 17", group:"Group K", venue:"Kansas City",
     home:"Portugal", homeFlag:"🇵🇹", homeCode:"POR", homePlayers:["POR"],
