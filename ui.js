@@ -1,3 +1,32 @@
+// ─── COUNTRY FLAG IMAGES ─────────────────────────
+// flagcdn.com — free CDN, no API key, CORS-safe
+const FLAG_CDN = {
+  FRA:"fr",ESP:"es",ARG:"ar",ENG:"gb-eng",BRA:"br",POR:"pt",GER:"de",
+  MAR:"ma",USA:"us",NED:"nl",COL:"co",URU:"uy",JPN:"jp",BEL:"be",
+  CRO:"hr",SEN:"sn",NOR:"no",
+  MEX:"mx",RSA:"za",KOR:"kr",CZE:"cz",PAR:"py",CUR:"cw",EGY:"eg",
+  CPV:"cv",KSA:"sa",ALG:"dz",CGO:"cd",SCO:"gb-sct",ECU:"ec",
+  SWE:"se",IRQ:"iq",AUT:"at",GHA:"gh",
+  France:"fr",Spain:"es",Argentina:"ar",England:"gb-eng",Brazil:"br",
+  Portugal:"pt",Germany:"de",Morocco:"ma",Netherlands:"nl",Colombia:"co",
+  Uruguay:"uy",Japan:"jp",Belgium:"be",Croatia:"hr",Senegal:"sn",
+  Mexico:"mx","South Africa":"za","Korea Republic":"kr",Czechia:"cz",
+  Scotland:"gb-sct",Ecuador:"ec",Sweden:"se","Saudi Arabia":"sa",
+  Ghana:"gh",Iraq:"iq",Austria:"at",Algeria:"dz",Paraguay:"py",
+  "Cape Verde":"cv",Egypt:"eg","Congo DR":"cd",Curaçao:"cw",Norway:"no"
+};
+
+function flagImg(key, size) {
+  const code = FLAG_CDN[key];
+  if (!code) return "";
+  const [w, h] = size === "lg" ? [60,45] : size === "md" ? [40,30] : [24,18];
+  return "<img src=\"https://flagcdn.com/" + w + "x" + h + "/" + code + ".png\" "
+       + "width=\"" + w + "\" height=\"" + h + "\" "
+       + "alt=\"" + key + "\" loading=\"lazy\" "
+       + "style=\"border-radius:2px;vertical-align:middle;flex-shrink:0;display:inline-block\" "
+       + "onerror=\"this.style.display='none'\"/>";
+}
+
 // ═══════════════════════════════════════════════
 //  UI.JS — COMPLETE CLEAN REBUILD
 // ═══════════════════════════════════════════════
