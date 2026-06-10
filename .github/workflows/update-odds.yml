@@ -1,7 +1,7 @@
 name: Daily AH Odds Update
 on:
   schedule:
-    - cron: '0 22 * * *'   # 06:00 Malaysia time daily
+    - cron: '0 22 * * *'
   workflow_dispatch:
 permissions:
   contents: write
@@ -11,15 +11,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with:
+          python-version: '3.12'
       - name: Fetch latest AH odds + recompute predictions
         env:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: python scripts/update_odds.py
       - name: Commit if changed
-        run: git add odds.js results.js
+        run: |
           git config user.name "odds-bot"
           git config user.email "bot@users.noreply.github.com"
-          
+          git add odds.js results.js
           git diff --cached --quiet || git commit -m "bot: daily AH odds refresh"
           git push
