@@ -679,3 +679,70 @@ function renderVerdicts(sfProbs, winProbs) {
     "<div class='verdict-grid'>" + cardsHtml + "</div>" + dhHtml;
   anchor.appendChild(wrapper);
 }
+
+// ═══════════════════════════════════════════════
+//  PREDICTION ACCURACY BOARD
+//  Actual RESULTS vs model: exact score, BIG/SMALL, AH pick, winner
+// ═══════════════════════════════════════════════
+function renderAccuracy() {
+  const el = document.getElementById("accuracyBoard");
+  if (!el) return;
+  el.innerHTML = "";
+  const played = MATCHES.filter(m => typeof RESULTS !== "undefined" && RESULTS[m.id]);
+
+  if (!played.length) {
+    el.innerHTML = "<div style='padding:48px;text-align:center;background:var(--white);border:1px solid var(--border);border-radius:var(--r)'>" +
+      "<div style='font-size:34px;margin-bottom:10px'>📊</div>" +
+      "<div style='font-weight:700;font-size:15px;color:var(--text)'>No completed matches yet</div>" +
+      "<div style='font-size:12px;color:var(--text3);margin-top:6px'>Tournament starts Jun 11. As each match completes and its score is recorded in results.js, this board shows prediction vs actual with a running accuracy index.</div></div>";
+    return;
+  }
+
+  let scoreHit=0, bsHit=0, ahHit=0, winnerHit=0;
+  const rows = [];
+  played.forEach(m => {
+    const r = RESULTS[m.id];
+    const sc = predictScore(m);
+    const actBig = (r.home + r.away) >= 3;
+    const exScore = (sc.gH === r.home && sc.gA === r.away);
+    const bsOk = (sc.isBig === actBig);
+    const predWinner = m.simHomeWin >= 50 ? "H" : "A";
+    const actWinner = r.home > r.away ? "H" : (r.away > r.home ? "A" : "D");
+    const winOk = predWinner === actWinner;
+    const margin = r.home - r.away;
+    const backedHome = m.recLabel.indexOf(m.homeCode) !== -1;
+    const adj = backedHome ? (margin + m.ah.line) : (-margin - m.ah.line);
+    const ahOk = adj > 0;
+    if (exScore) scoreHit++;
+    if (bsOk) bsHit++;
+    if (ahOk) ahHit++;
+    if (winOk) winnerHit++;
+    rows.push("<div class='bw-ah-row' style='grid-template-columns:1.4fr 1fr 1fr 1fr 1fr'>" +
+      "<div><div class='bw-ah-match-date'>" + m.date + " · " + (m.group||m.stage) + "</div>" +
+      "<div class='bw-ah-teams'>" + m.home + " " + r.home + " – " + r.away + " " + m.away + "</div></div>" +
+      "<div style='font-size:12px'>Pred: <b>" + sc.gH + "–" + sc.gA + "</b><br>" + (exScore?"<span style='color:var(--green)'>✓ exact</span>":"<span style='color:var(--text3)'>✗</span>") + "</div>" +
+      "<div style='font-size:12px'>" + (sc.isBig?"BIG":"SMALL") + " pred<br>" + (bsOk?"<span style='color:var(--green)'>✓ hit</span>":"<span style='color:var(--red)'>✗ miss</span>") + "</div>" +
+      "<div style='font-size:12px'>" + m.recLabel.replace("🔥 ","").replace("✓ ","") + "<br>" + (ahOk?"<span style='color:var(--green)'>✓ covered</span>":"<span style='color:var(--red)'>✗ lost</span>") + "</div>" +
+      "<div style='font-size:12px'>Winner<br>" + (winOk?"<span style='color:var(--green)'>✓</span>":"<span style='color:var(--red)'>✗</span>") + "</div>" +
+    "</div>");
+  });
+
+  const n = played.length;
+  const pct = x => Math.round(x/n*100);
+  const overall = Math.round((scoreHit + bsHit + ahHit + winnerHit) / (n*4) * 100);
+  el.innerHTML =
+    "<div style='display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px'>" +
+      accCard("Overall Index", overall+"%", "across all 4 metrics") +
+      accCard("Exact Score", pct(scoreHit)+"%", scoreHit+"/"+n) +
+      accCard("BIG / SMALL", pct(bsHit)+"%", bsHit+"/"+n) +
+      accCard("AH Pick", pct(ahHit)+"%", ahHit+"/"+n) +
+      accCard("Winner", pct(winnerHit)+"%", winnerHit+"/"+n) +
+    "</div>" + rows.join("");
+}
+function accCard(t,v,s){
+  return "<div style='background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center'>" +
+    "<div style='font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase'>"+t+"</div>" +
+    "<div style='font-size:24px;font-weight:800;color:var(--green);font-family:DM Mono,monospace'>"+v+"</div>" +
+    "<div style='font-size:10px;color:var(--text3)'>"+s+"</div></div>";
+}
+document.addEventListener("DOMContentLoaded", () => { try{renderAccuracy();}catch(e){} });

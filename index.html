@@ -33,6 +33,7 @@
       <button class="bw-pill" onclick="switchTab('sim',this)"    data-tab="sim" id="simPill">
         Simulation <span class="bw-pill-badge" id="simBadge" style="display:none">✓</span>
       </button>
+      <button class="bw-pill" onclick="switchTab('accuracy',this)" data-tab="accuracy">Accuracy</button>
     </div>
   </div>
 </div>
@@ -194,7 +195,18 @@
 </div>
 
 <!-- FOOTER -->
-<footer class="bw-footer">
+
+    <div class="bw-tab" id="tab-accuracy">
+      <div class="bw-content-header">
+        <div>
+          <h1 class="bw-content-title">Prediction Accuracy</h1>
+          <p class="bw-content-sub">Actual results vs model predictions · updates as matches complete</p>
+        </div>
+      </div>
+      <div id="accuracyBoard"></div>
+    </div>
+
+  <footer class="bw-footer">
   <div class="bw-footer-inner">
     <span>⚽ WC2026 Predictor</span>
     <span class="bw-ft-sep">·</span>
@@ -209,6 +221,7 @@
 <script src="odds.js"></script>
 <script src="data.js"></script>
 <script src="sim.js"></script>
-<script src="ui.js"></script>
+<script src="results.js"></script>
+  <script src="ui.js"></script>
 </body>
 </html>
