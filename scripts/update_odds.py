@@ -129,3 +129,58 @@ if changed:
     print(f"{changed} matches updated.")
 else:
     print("No line changes today.")
+
+# ═══════════════════════════════════════════════════════════
+#  PART 2 — FETCH FINAL SCORES → results.js (accuracy tab)
+#  Uses The Odds API scores endpoint (included in free key).
+#  daysFrom=3 returns games completed in the last 3 days.
+# ═══════════════════════════════════════════════════════════
+SCORES_URL = (f"https://api.the-odds-api.com/v4/sports/{SPORT}/scores/"
+              f"?apiKey={API_KEY}&daysFrom=3")
+try:
+    with urllib.request.urlopen(SCORES_URL, timeout=30) as r:
+        games = json.load(r)
+except Exception as e:
+    print("Scores fetch failed:", e); games = []
+
+completed = {}
+for g in games:
+    if not g.get("completed"): continue
+    h = NAME2CODE.get(g.get("home_team","")); a = NAME2CODE.get(g.get("away_team",""))
+    if not h or not a or not g.get("scores"): continue
+    sc = {s["name"]: int(s["score"]) for s in g["scores"]}
+    hs = sc.get(g["home_team"]); as_ = sc.get(g["away_team"])
+    if hs is None or as_ is None: continue
+    completed[(h,a)] = (hs, as_)
+
+print(f"Completed games found: {len(completed)}")
+
+if completed:
+    # map (homeCode, awayCode) -> match id from odds.js
+    odds_txt = open("odds.js").read()
+    id_of = {}
+    for m in re.finditer(r'id:"([A-Z]+\d*)".*?homeCode:"(\w+)".*?awayCode:"(\w+)"', odds_txt, re.DOTALL):
+        # restrict to within one block: re-find per id to avoid greedy cross-block capture
+        pass
+    for m in re.finditer(r'id:"([A-Z]+\d*)"', odds_txt):
+        mid = m.group(1)
+        bs = odds_txt.find(f'id:"{mid}"'); nx = odds_txt.find('{ id:"', bs+5)
+        block = odds_txt[bs: nx if nx>0 else len(odds_txt)]
+        hm = re.search(r'homeCode:"(\w+)"', block); am = re.search(r'awayCode:"(\w+)"', block)
+        if hm and am: id_of[(hm.group(1), am.group(1))] = mid
+
+    res_txt = open("results.js").read()
+    added = 0
+    for (h,a),(hs,as_) in completed.items():
+        mid = id_of.get((h,a))
+        if not mid: continue
+        if f'"{mid}"' in res_txt: continue   # already recorded
+        entry = f'  "{mid}": {{ home: {hs}, away: {as_} }},\n'
+        res_txt = res_txt.replace("const RESULTS = {\n", "const RESULTS = {\n" + entry, 1)
+        added += 1
+        print(f"  recorded {mid}: {h} {hs}-{as_} {a}")
+    if added:
+        open("results.js","w").write(res_txt)
+        print(f"{added} results written to results.js")
+    else:
+        print("No new results to record.")
