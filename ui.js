@@ -710,9 +710,15 @@ function renderAccuracy() {
     const actWinner = r.home > r.away ? "H" : (r.away > r.home ? "A" : "D");
     const winOk = predWinner === actWinner;
     const margin = r.home - r.away;
-    const backedHome = m.recLabel.indexOf(m.homeCode) !== -1;
-    const adj = backedHome ? (margin + m.ah.line) : (-margin - m.ah.line);
+    // Model AH side: the model backs the side it rates >=50% to win, at the fixture line
+    const modelHome = m.simHomeWin >= 50;
+    const adj = modelHome ? (margin + m.ah.line) : (-margin - m.ah.line);
+    const ahPush = Math.abs(adj) < 1e-9;
     const ahOk = adj > 0;
+    const awayLine = -m.ah.line;
+    const ahLabel = modelHome
+      ? m.homeCode + " " + (m.ah.line > 0 ? "+" : "") + m.ah.line
+      : m.awayCode + " " + (awayLine > 0 ? "+" : "") + awayLine;
     if (exScore) scoreHit++;
     if (bsOk) bsHit++;
     if (ahOk) ahHit++;
@@ -722,7 +728,7 @@ function renderAccuracy() {
       "<div class='bw-ah-teams'>" + m.home + " " + r.home + " – " + r.away + " " + m.away + "</div></div>" +
       "<div style='font-size:12px'>Pred: <b>" + sc.gH + "–" + sc.gA + "</b><br>" + (exScore?"<span style='color:var(--green)'>✓ exact</span>":"<span style='color:var(--text3)'>✗</span>") + "</div>" +
       "<div style='font-size:12px'>" + (sc.isBig?"BIG":"SMALL") + " pred<br>" + (bsOk?"<span style='color:var(--green)'>✓ hit</span>":"<span style='color:var(--red)'>✗ miss</span>") + "</div>" +
-      "<div style='font-size:12px'>" + m.recLabel.replace("🔥 ","").replace("✓ ","") + "<br>" + (ahOk?"<span style='color:var(--green)'>✓ covered</span>":"<span style='color:var(--red)'>✗ lost</span>") + "</div>" +
+      "<div style='font-size:12px'>AH: <b>" + ahLabel + "</b><br>" + (ahPush?"<span style='color:var(--text3)'>— push</span>":(ahOk?"<span style='color:var(--green)'>✓ covered</span>":"<span style='color:var(--red)'>✗ lost</span>")) + "</div>" +
       "<div style='font-size:12px'>Winner<br>" + (winOk?"<span style='color:var(--green)'>✓</span>":"<span style='color:var(--red)'>✗</span>") + "</div>" +
     "</div>");
   });
@@ -732,7 +738,7 @@ function renderAccuracy() {
   const overall = Math.round((scoreHit + bsHit + ahHit + winnerHit) / (n*4) * 100);
   el.innerHTML =
     "<div style='display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px'>" +
-      accCard("Overall Index", overall+"%", "across all 4 metrics") +
+      accCard("Overall Index", overall+"%", n+" of 104 matches graded") +
       accCard("Exact Score", pct(scoreHit)+"%", scoreHit+"/"+n) +
       accCard("BIG / SMALL", pct(bsHit)+"%", bsHit+"/"+n) +
       accCard("AH Pick", pct(ahHit)+"%", ahHit+"/"+n) +
