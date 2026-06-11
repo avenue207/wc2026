@@ -4,13 +4,13 @@ const FLAG_CDN = {
   FRA:"fr",ESP:"es",ARG:"ar",ENG:"gb-eng",BRA:"br",POR:"pt",GER:"de",
   MAR:"ma",USA:"us",NED:"nl",COL:"co",URU:"uy",JPN:"jp",BEL:"be",
   CRO:"hr",SEN:"sn",NOR:"no",
-  MEX:"mx",RSA:"za",KOR:"kr",CZE:"cz",CAN:"ca",BIH:"ba",PAR:"py",CUR:"cw",EGY:"eg",
+  MEX:"mx",RSA:"za",KOR:"kr",CZE:"cz",PAR:"py",CUR:"cw",EGY:"eg",
   CPV:"cv",KSA:"sa",ALG:"dz",CGO:"cd",SCO:"gb-sct",ECU:"ec",
   SWE:"se",IRQ:"iq",AUT:"at",GHA:"gh",
   France:"fr",Spain:"es",Argentina:"ar",England:"gb-eng",Brazil:"br",
   Portugal:"pt",Germany:"de",Morocco:"ma",Netherlands:"nl",Colombia:"co",
   Uruguay:"uy",Japan:"jp",Belgium:"be",Croatia:"hr",Senegal:"sn",
-  Mexico:"mx","South Africa":"za",Canada:"ca","Bosnia and Herzegovina":"ba","Korea Republic":"kr",Czechia:"cz",
+  Mexico:"mx","South Africa":"za","Korea Republic":"kr",Czechia:"cz",
   Scotland:"gb-sct",Ecuador:"ec",Sweden:"se","Saudi Arabia":"sa",
   Ghana:"gh",Iraq:"iq",Austria:"at",Algeria:"dz",Paraguay:"py",
   "Cape Verde":"cv",Egypt:"eg","Congo DR":"cd",Curaçao:"cw",Norway:"no"
@@ -108,12 +108,6 @@ function renderMatches() {
 // ═══════════════════════════════════════════════
 //  SCORE PREDICTION — ATK/DEF model + WDW odds
 // ═══════════════════════════════════════════════
-function poissonP(k, lam){ let f=1; for(let i=2;i<=k;i++) f*=i; return Math.exp(-lam)*Math.pow(lam,k)/f; }
-
-// Single-engine prediction: one Poisson score matrix drives the displayed score,
-// BIG/SMALL probability and AH cover, so they can never contradict each other.
-// Displayed score = most likely scoreline among outcomes where the official pick
-// (m.recLabel in odds.js) wins, keeping every card's story coherent.
 function predictScore(m) {
   const wdw = (typeof WDW_ODDS !== "undefined" && WDW_ODDS[m.id]) || [2.0,3.3,3.7];
   const pH=1/wdw[0], pA=1/wdw[2], vig=pH+1/wdw[1]+pA;
@@ -137,44 +131,10 @@ function predictScore(m) {
     xGH=2.2*normH/(normH+normA);
     xGA=2.2*normA/(normH+normA);
   }
-  xGH=Math.max(0.30,Math.min(6,xGH));
-  xGA=Math.max(0.40,Math.min(4,xGA));  // floor: WC-level sides rarely project under 0.40 xG
-
-  const L=(m.ah && typeof m.ah.line==="number") ? m.ah.line : null;
-  let pickHome=null;
-  if(m.recLabel && m.recLabel.indexOf("Skip")===-1 && m.homeCode){
-    pickHome = m.recLabel.indexOf(m.homeCode) !== -1;
-  }
-  const N=9;
-  let bestP=-1, mgH=1, mgA=0;        // unconditional mode
-  let cbestP=-1, cgH=-1, cgA=-1;     // mode conditional on pick winning
-  let pBig=0, pHomeWin=0, coverHome=(L===null?null:0);
-  for(let h=0;h<N;h++){
-    const ph=poissonP(h,xGH);
-    for(let a=0;a<N;a++){
-      const p=ph*poissonP(a,xGA);
-      if(p>bestP){bestP=p; mgH=h; mgA=a;}
-      if(h+a>=3) pBig+=p;
-      if(h>a) pHomeWin+=p;
-      if(L!==null){
-        const adj=(h-a)+L;
-        if(adj>=0.5-1e-9)               coverHome+=p;       // full win
-        else if(Math.abs(adj-0.25)<1e-9) coverHome+=0.75*p;  // half win
-        else if(Math.abs(adj)<1e-9)      coverHome+=0.5*p;   // push
-        else if(Math.abs(adj+0.25)<1e-9) coverHome+=0.25*p;  // half loss
-        if(pickHome!==null){
-          const wins = pickHome ? (adj>=0.25-1e-9) : (adj<=-0.25+1e-9);
-          if(wins && p>cbestP){cbestP=p; cgH=h; cgA=a;}
-        }
-      }
-    }
-  }
-  const gH = (cgH>=0)?cgH:mgH, gA=(cgA>=0)?cgA:mgA;
-  const pBigPct = Math.round(pBig*100);
-  return {gH, gA, total:gH+gA, isBig:(gH+gA)>=3,
-          xGH:xGH.toFixed(1), xGA:xGA.toFixed(1),
-          pBig:pBigPct, pHomeWin:Math.round(pHomeWin*100),
-          coverHome: coverHome===null?null:Math.round(coverHome*100)};
+  xGH=Math.max(0.25,Math.min(6,xGH));
+  xGA=Math.max(0.10,Math.min(4,xGA));
+  const gH=Math.round(xGH), gA=Math.round(xGA), total=gH+gA;
+  return {gH, gA, total, isBig:total>=3, xGH:xGH.toFixed(1), xGA:xGA.toFixed(1)};
 }
 
 
@@ -197,8 +157,8 @@ function buildMatchRow(m, idx) {
       (function(){var sc=predictScore(m);return "<div class='bw-score-pred'>"
         +"<span class='bw-score-val'>"+sc.gH+" - "+sc.gA+"</span>"
         +"<span class='bw-total "+(sc.isBig?"bw-total-big":"bw-total-small")+"'>"
-        +(sc.isBig?"⬆ BIG (3+) · "+sc.pBig+"%":"⬇ SMALL (≤2) · "+(100-sc.pBig)+"%")+"</span>"
-        +"<span class='bw-xg-tag'>xG "+sc.xGH+"/"+sc.xGA+(sc.coverHome!==null?" · AH cover "+sc.coverHome+"%":"")+"</span></div>";})() +
+        +(sc.isBig?"⬆ BIG (3+)":"⬇ SMALL (≤2)")+"</span>"
+        +"<span class='bw-xg-tag'>xG "+sc.xGH+"/"+sc.xGA+"</span></div>";})() +
     "</div>" +
     "<div class='bw-wdw'>" +
       "<button class='bw-odds-btn' onclick='this.classList.toggle(\"selected\")'><span class='bw-odds-label'>Home</span>" + wdw[0].toFixed(2) + "</button>" +
