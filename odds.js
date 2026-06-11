@@ -38,10 +38,10 @@ const MATCHES = [
     home:"Mexico", homeFlag:"🇲🇽", homeCode:"MEX",
     away:"South Africa", awayFlag:"🇿🇦", awayCode:"RSA",
     homeML:-350, awayML:320,
-    ah:{ line:-1, homeLabel:"MEX -1", awayLabel:"RSA +1.0", homePayout:1.7, awayPayout:2.22 },
-    simHomeWin:74, simCoverAH:31, marketCoverAH:57, edge:-26,
+    ah:{ line:-1.25, homeLabel:"MEX -1.25", awayLabel:"RSA +1.25", homePayout:1.85, awayPayout:1.95 },
+    simHomeWin:74, simCoverAH:26, marketCoverAH:51, edge:-25,
     notes:"Mexico 74% to win at home Azteca but -1 cover needs 2+ goals. High crowd energy but margin uncertain.",
-    rec:"strong", recLabel:"🔥 Back RSA +1.0", recDetail:"Underdog covers 69% — strong value on RSA." },
+    rec:"strong", recLabel:"🔥 Back RSA +1.25", recDetail:"Underdog covers 74% — strong value taking RSA +1.25." },
 
   { id:"A2", stage:"GRP", date:"Jun 11", group:"Group A", venue:"Guadalajara",
     home:"Korea Republic", homeFlag:"🇰🇷", homeCode:"KOR",
@@ -51,16 +51,6 @@ const MATCHES = [
     simHomeWin:44, simCoverAH:44, marketCoverAH:50, edge:-6,
     notes:"Balanced match. Czechia slight sim edge. DNB at 0 — draw refunds stake.",
     rec:"value", recLabel:"✓ Back CZE 0", recDetail:"Underdog covers 56% of the time — value on CZE 0." },
-
-
-  { id:"B1", stage:"GRP", date:"Jun 12", group:"Group B", venue:"Toronto",
-    home:"Canada", homeFlag:"🇨🇦", homeCode:"CAN",
-    away:"Bosnia and Herzegovina", awayFlag:"🇧🇦", awayCode:"BIH",
-    homeML:-125, awayML:350,
-    ah:{ line:-0.75, homeLabel:"CAN -0.75", awayLabel:"BIH +0.75", homePayout:1.88, awayPayout:1.92 },
-    simHomeWin:60, simCoverAH:46, marketCoverAH:51, edge:-5,
-    notes:"Co-host buzz in Toronto vs Bosnia's physical counter-punch block. Canada wins ~60% of sims but a one-goal margin is the most likely shape.",
-    rec:"slight", recLabel:"Lean CAN -0.75", recDetail:"Win-by-one is the modal margin - a half-win at -0.75. Thin edges both ways." },
 
   { id:"C1", stage:"GRP", date:"Jun 13", group:"Group C", venue:"East Rutherford NJ",
     home:"Brazil", homeFlag:"🇧🇷", homeCode:"BRA", homePlayers:["BRA"],
@@ -205,10 +195,10 @@ const MATCHES = [
     home:"France", homeFlag:"🇫🇷", homeCode:"FRA", homePlayers:["FRA"],
     away:"Iraq", awayFlag:"🇮🇶", awayCode:"IRQ",
     homeML:-1000, awayML:1800,
-    ah:{ line:-2.5, homeLabel:"FRA -2.5", awayLabel:"IRQ +2.5", homePayout:2.05, awayPayout:1.8 },
-    simHomeWin:95, simCoverAH:31, marketCoverAH:47, edge:-16,
+    ah:{ line:-2.25, homeLabel:"FRA -2.25", awayLabel:"IRQ +2.25", homePayout:1.83, awayPayout:1.98 },
+    simHomeWin:95, simCoverAH:36, marketCoverAH:52, edge:-16,
     notes:"France vs Iraq (+7000 WC odds). Mbappé will be hungry. 95% win, 70% to win by 3+.",
-    rec:"strong", recLabel:"🔥 Back IRQ +2.5", recDetail:"Underdog covers 69% — strong value on IRQ." },
+    rec:"strong", recLabel:"🔥 Back IRQ +2.25", recDetail:"Underdog covers 64% — strong value on IRQ." },
 
   { id:"J2", stage:"GRP", date:"Jun 22", group:"Group J", venue:"Dallas",
     home:"Argentina", homeFlag:"🇦🇷", homeCode:"ARG", homePlayers:["ARG"],
@@ -424,7 +414,6 @@ const TOP_SCORERS = [
 // WDW odds embedded per match (added to existing MATCHES)
 // Format: [home decimal, draw decimal, away decimal]
 const WDW_ODDS = {
-  "B1":[1.80,3.60,4.50],
   A1:[1.28,6.50,14.00], A2:[2.05,3.50,3.60],
   C1:[1.32,5.50,11.00], D1:[2.10,3.30,3.80],
   E1:[1.04,18.00,50.00], F1:[2.20,3.40,3.30],
