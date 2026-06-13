@@ -706,15 +706,17 @@ function renderAccuracy() {
     const actBig = (r.home + r.away) >= 3;
     const exScore = (sc.gH === r.home && sc.gA === r.away);
     const bsOk = (sc.isBig === actBig);
-    const predWinner = m.simHomeWin >= 50 ? "H" : "A";
     const actWinner = r.home > r.away ? "H" : (r.away > r.home ? "A" : "D");
-    const winOk = predWinner === actWinner;
     const margin = r.home - r.away;
-    // Model AH side: the model backs the side it rates >=50% to win, at the fixture line
-    // Model AH side derived from the actual AH recommendation (recLabel),
-    // NOT simHomeWin (match-winner prob) — these can point to different sides.
-    // e.g. D1: USA 51% to win match (simHomeWin>=50) but recLabel="Lean PAR +0.5"
+    // Single source of truth for "what the model predicted": the actual AH
+    // recommendation (recLabel). predWinner and the AH pick must derive from
+    // the SAME side, so all 4 accuracy columns grade against one prediction.
+    // (Previously predWinner used simHomeWin>=50 independently of recLabel,
+    // so e.g. D1 could show AH "lost" on Paraguay but Winner "correct" on
+    // USA — two different predictions for one match.)
     const modelHome = m.recLabel.indexOf(m.homeCode) !== -1;
+    const predWinner = modelHome ? "H" : "A";
+    const winOk = predWinner === actWinner;
     const adj = modelHome ? (margin + m.ah.line) : (-margin - m.ah.line);
     const ahPush = Math.abs(adj) < 1e-9;
     const ahOk = adj > 0;
