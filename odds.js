@@ -119,8 +119,8 @@ const MATCHES = [
     away:"Uruguay", awayFlag:"🇺🇾", awayCode:"URU", awayPlayers:["URU"],
     homeML:420, awayML:-160,
     ah:{ line:1.25, homeLabel:"KSA +1.25", awayLabel:"URU -1.25", homePayout:1.82, awayPayout:2.02 },
-    simHomeWin:60, simCoverAH:65, marketCoverAH:53, edge:12,
-    notes:"Uruguay (Valverde, Núñez, Araújo) 60% win. -0.5 = just need Uruguay to win. Thin payout.",
+    simHomeWin:40, simCoverAH:65, marketCoverAH:53, edge:12,
+    notes:"Uruguay (Valverde, Nunez, Araujo) 60% win, KSA 40%. KSA +1.25 covers if they lose by <=1 - 65% of sims.",
     rec:"strong", recLabel:"🔥 Back KSA +1.25", recDetail:"Sim cover 65% — strong value laying KSA." },
 
   { id:"I1", stage:"GRP", date:"Jun 16", group:"Group I", venue:"East Rutherford NJ",
