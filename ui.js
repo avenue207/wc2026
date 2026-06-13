@@ -6,14 +6,14 @@ const FLAG_CDN = {
   CRO:"hr",SEN:"sn",NOR:"no",CAN:"ca",BIH:"ba",
   MEX:"mx",RSA:"za",KOR:"kr",CZE:"cz",PAR:"py",CUR:"cw",EGY:"eg",
   CPV:"cv",KSA:"sa",ALG:"dz",CGO:"cd",SCO:"gb-sct",ECU:"ec",
-  SWE:"se",IRQ:"iq",AUT:"at",GHA:"gh",
+  SWE:"se",IRQ:"iq",AUT:"at",GHA:"gh",QAT:"qa",SUI:"ch",HAI:"ht",
   France:"fr",Spain:"es",Argentina:"ar",England:"gb-eng",Brazil:"br",
   Portugal:"pt",Germany:"de",Morocco:"ma",Netherlands:"nl",Colombia:"co",
   Uruguay:"uy",Japan:"jp",Belgium:"be",Croatia:"hr",Senegal:"sn",
   Mexico:"mx","South Africa":"za","Korea Republic":"kr",Czechia:"cz",
   Scotland:"gb-sct",Ecuador:"ec",Sweden:"se","Saudi Arabia":"sa",
   Ghana:"gh",Iraq:"iq",Austria:"at",Algeria:"dz",Paraguay:"py",
-  "Cape Verde":"cv",Egypt:"eg","Congo DR":"cd",Curaçao:"cw",Norway:"no",Canada:"ca","Bosnia and Herzegovina":"ba"
+  "Cape Verde":"cv",Egypt:"eg","Congo DR":"cd",Curaçao:"cw",Norway:"no",Canada:"ca","Bosnia and Herzegovina":"ba",Qatar:"qa",Switzerland:"ch",Haiti:"ht"
 };
 
 function flagImg(key, size) {
