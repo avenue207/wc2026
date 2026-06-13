@@ -60,6 +60,14 @@ const MATCHES = [
     notes:"Canada host-nation opener vs disciplined Bosnia defense. O/U set at 2.5 — tight, low-event match expected.",
     rec:"strong", recLabel:"🔥 Back CAN -0.5", recDetail:"Sim cover 62% — strong value laying CAN." },
 
+  { id:"B2", stage:"GRP", date:"Jun 13", group:"Group B", venue:"Santa Clara",
+    home:"Qatar", homeFlag:"🇶🇦", homeCode:"QAT",
+    away:"Switzerland", awayFlag:"🇨🇭", awayCode:"SUI",
+    homeML:850, awayML:-350,
+    ah:{ line:1.75, homeLabel:"QAT +1.75", awayLabel:"SUI -1.75", homePayout:1.95, awayPayout:1.88 },
+    simHomeWin:4, simCoverAH:55, marketCoverAH:47, edge:8,
+    notes:"Switzerland heavy favourites (Kalshi 81% SUI) and BTTS No / Qatar Under 1.5 in 4 of 5 - a 0-2/0-1 shape is likely. -1.75 is steep: full cover needs a 2-goal win plus the quarter, so QAT +1.75 carries value on the same favourites-undercover pattern seen across the bracket.",
+    rec:"strong", recLabel:"🔥 Back QAT +1.75", recDetail:"SUI -1.75 covers only ~45% of sims vs ~53% market-implied - QAT +1.75 is the value side even in a one-sided match." },
   { id:"C1", stage:"GRP", date:"Jun 13", group:"Group C", venue:"East Rutherford NJ",
     home:"Brazil", homeFlag:"🇧🇷", homeCode:"BRA", homePlayers:["BRA"],
     away:"Morocco", awayFlag:"🇲🇦", awayCode:"MAR", awayPlayers:["MAR"],
@@ -162,6 +170,15 @@ const MATCHES = [
   // ══════════════════════════════════════════════════════
   //  GROUP STAGE — ROUND 2 KEY MATCHES (Jun 18–22)
   // ══════════════════════════════════════════════════════
+
+  { id:"C3", stage:"GRP", date:"Jun 13", group:"Group C", venue:"Foxborough",
+    home:"Haiti", homeFlag:"🇭🇹", homeCode:"HAI",
+    away:"Scotland", awayFlag:"🏴", awayCode:"SCO",
+    homeML:450, awayML:-185,
+    ah:{ line:1.0, homeLabel:"HAI +1.0", awayLabel:"SCO -1.0", homePayout:1.87, awayPayout:1.95 },
+    simHomeWin:10, simCoverAH:54, marketCoverAH:52, edge:2,
+    notes:"Scotland the much sharper side on current form (8-1 combined in last two warm-ups) vs World-Cup debutants Haiti. Model score 0-2 fully covers SCO -1.0, and the cover probability also clears the market line - a rare case where the headline score and the AH edge agree.",
+    rec:"slight", recLabel:"✓ Back SCO -1.0", recDetail:"Model 0-2: Scotland covers -1.0 in ~54% of outcomes, narrowly ahead of the ~52% market price." },
 
   { id:"C2", stage:"GRP", date:"Jun 19", group:"Group C", venue:"New York NJ",
     home:"Brazil", homeFlag:"🇧🇷", homeCode:"BRA", homePlayers:["BRA"],
@@ -422,6 +439,7 @@ const TOP_SCORERS = [
 // WDW odds embedded per match (added to existing MATCHES)
 // Format: [home decimal, draw decimal, away decimal]
 const WDW_ODDS = {
+  B2:[9.5,5.5,1.286], C3:[5.5,3.8,1.54],
   A1:[1.28,6.50,14.00], A2:[2.05,3.50,3.60], B1:[1.80,3.50,4.90],
   C1:[1.32,5.50,11.00], D1:[2.10,3.30,3.80],
   E1:[1.04,18.00,50.00], F1:[2.20,3.40,3.30],
