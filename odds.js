@@ -72,10 +72,10 @@ const MATCHES = [
     home:"Brazil", homeFlag:"🇧🇷", homeCode:"BRA", homePlayers:["BRA"],
     away:"Morocco", awayFlag:"🇲🇦", awayCode:"MAR", awayPlayers:["MAR"],
     homeML:-350, awayML:320,
-    ah:{ line:-1, homeLabel:"BRA -1", awayLabel:"MAR +1.0", homePayout:2.21, awayPayout:1.73 },
-    simHomeWin:70, simCoverAH:33, marketCoverAH:44, edge:-11,
+    ah:{ line:-0.25, homeLabel:"BRA -0.25", awayLabel:"MAR +0.25", homePayout:1.81, awayPayout:2.1 },
+    simHomeWin:70, simCoverAH:50, marketCoverAH:54, edge:-4,
     notes:"Morocco DEF 89 + Bounou GK 87 = elite defensive block. Brazil 70% win but only 44% to win by 2+.",
-    rec:"strong", recLabel:"🔥 Back MAR +1.0", recDetail:"Underdog covers 67% — strong value on MAR." },
+    rec:"slight", recLabel:"Lean BRA -0.25", recDetail:"Sim cover 50% — marginal." },
 
   { id:"D1", stage:"GRP", date:"Jun 12", group:"Group D", venue:"Los Angeles",
     home:"USA", homeFlag:"🇺🇸", homeCode:"USA", homePlayers:["USA"],
