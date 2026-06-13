@@ -51,6 +51,14 @@ const MATCHES = [
     simHomeWin:44, simCoverAH:44, marketCoverAH:50, edge:-6,
     notes:"Balanced match. Czechia slight sim edge. DNB at 0 — draw refunds stake.",
     rec:"value", recLabel:"✓ Back CZE 0", recDetail:"Underdog covers 56% of the time — value on CZE 0." },
+  { id:"B1", stage:"GRP", date:"Jun 12", group:"Group B", venue:"Toronto",
+    home:"Canada", homeFlag:"🇨🇦", homeCode:"CAN",
+    away:"Bosnia and Herzegovina", awayFlag:"🇧🇦", awayCode:"BIH",
+    homeML:-125, awayML:390,
+    ah:{ line:-0.5, homeLabel:"CAN -0.5", awayLabel:"BIH +0.5", homePayout:1.80, awayPayout:2.00 },
+    simHomeWin:41, simCoverAH:41, marketCoverAH:53, edge:-12,
+    notes:"Canada host-nation opener vs disciplined Bosnia defense. O/U set at 2.5 — tight, low-event match expected.",
+    rec:"strong", recLabel:"🔥 Back BIH +0.5", recDetail:"Underdog covers 59% — strong value on BIH." },
 
   { id:"C1", stage:"GRP", date:"Jun 13", group:"Group C", venue:"East Rutherford NJ",
     home:"Brazil", homeFlag:"🇧🇷", homeCode:"BRA", homePlayers:["BRA"],
@@ -414,7 +422,7 @@ const TOP_SCORERS = [
 // WDW odds embedded per match (added to existing MATCHES)
 // Format: [home decimal, draw decimal, away decimal]
 const WDW_ODDS = {
-  A1:[1.28,6.50,14.00], A2:[2.05,3.50,3.60],
+  A1:[1.28,6.50,14.00], A2:[2.05,3.50,3.60], B1:[1.80,3.50,4.90],
   C1:[1.32,5.50,11.00], D1:[2.10,3.30,3.80],
   E1:[1.04,18.00,50.00], F1:[2.20,3.40,3.30],
   G1:[1.44,4.80,7.50], H1:[1.06,16.00,45.00],

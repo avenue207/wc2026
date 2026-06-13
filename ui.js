@@ -3,7 +3,7 @@
 const FLAG_CDN = {
   FRA:"fr",ESP:"es",ARG:"ar",ENG:"gb-eng",BRA:"br",POR:"pt",GER:"de",
   MAR:"ma",USA:"us",NED:"nl",COL:"co",URU:"uy",JPN:"jp",BEL:"be",
-  CRO:"hr",SEN:"sn",NOR:"no",
+  CRO:"hr",SEN:"sn",NOR:"no",CAN:"ca",BIH:"ba",
   MEX:"mx",RSA:"za",KOR:"kr",CZE:"cz",PAR:"py",CUR:"cw",EGY:"eg",
   CPV:"cv",KSA:"sa",ALG:"dz",CGO:"cd",SCO:"gb-sct",ECU:"ec",
   SWE:"se",IRQ:"iq",AUT:"at",GHA:"gh",
@@ -13,7 +13,7 @@ const FLAG_CDN = {
   Mexico:"mx","South Africa":"za","Korea Republic":"kr",Czechia:"cz",
   Scotland:"gb-sct",Ecuador:"ec",Sweden:"se","Saudi Arabia":"sa",
   Ghana:"gh",Iraq:"iq",Austria:"at",Algeria:"dz",Paraguay:"py",
-  "Cape Verde":"cv",Egypt:"eg","Congo DR":"cd",Curaçao:"cw",Norway:"no"
+  "Cape Verde":"cv",Egypt:"eg","Congo DR":"cd",Curaçao:"cw",Norway:"no",Canada:"ca","Bosnia and Herzegovina":"ba"
 };
 
 function flagImg(key, size) {
@@ -711,7 +711,10 @@ function renderAccuracy() {
     const winOk = predWinner === actWinner;
     const margin = r.home - r.away;
     // Model AH side: the model backs the side it rates >=50% to win, at the fixture line
-    const modelHome = m.simHomeWin >= 50;
+    // Model AH side derived from the actual AH recommendation (recLabel),
+    // NOT simHomeWin (match-winner prob) — these can point to different sides.
+    // e.g. D1: USA 51% to win match (simHomeWin>=50) but recLabel="Lean PAR +0.5"
+    const modelHome = m.recLabel.indexOf(m.homeCode) !== -1;
     const adj = modelHome ? (margin + m.ah.line) : (-margin - m.ah.line);
     const ahPush = Math.abs(adj) < 1e-9;
     const ahOk = adj > 0;
