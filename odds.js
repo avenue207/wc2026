@@ -56,9 +56,9 @@ const MATCHES = [
     away:"Bosnia and Herzegovina", awayFlag:"🇧🇦", awayCode:"BIH",
     homeML:-125, awayML:390,
     ah:{ line:-0.5, homeLabel:"CAN -0.5", awayLabel:"BIH +0.5", homePayout:1.80, awayPayout:2.00 },
-    simHomeWin:41, simCoverAH:41, marketCoverAH:53, edge:-12,
+    simHomeWin:62, simCoverAH:62, marketCoverAH:53, edge:12,
     notes:"Canada host-nation opener vs disciplined Bosnia defense. O/U set at 2.5 — tight, low-event match expected.",
-    rec:"strong", recLabel:"🔥 Back BIH +0.5", recDetail:"Underdog covers 59% — strong value on BIH." },
+    rec:"strong", recLabel:"🔥 Back CAN -0.5", recDetail:"Sim cover 62% — strong value laying CAN." },
 
   { id:"C1", stage:"GRP", date:"Jun 13", group:"Group C", venue:"East Rutherford NJ",
     home:"Brazil", homeFlag:"🇧🇷", homeCode:"BRA", homePlayers:["BRA"],
