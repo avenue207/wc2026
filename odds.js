@@ -144,10 +144,10 @@ const MATCHES = [
     home:"Argentina", homeFlag:"🇦🇷", homeCode:"ARG", homePlayers:["ARG"],
     away:"Algeria", awayFlag:"🇩🇿", awayCode:"ALG",
     homeML:-350, awayML:400,
-    ah:{ line:-1.5, homeLabel:"ARG -1.5", awayLabel:"ALG +1.5", homePayout:1.88, awayPayout:1.92 },
-    simHomeWin:78, simCoverAH:34, marketCoverAH:51, edge:-17,
+    ah:{ line:-1.25, homeLabel:"ARG -1.25", awayLabel:"ALG +1.25", homePayout:2.08, awayPayout:1.86 },
+    simHomeWin:78, simCoverAH:39, marketCoverAH:47, edge:-8,
     notes:"Messi's final WC opener. Argentina EXP 96, ATK 93. -1.5 cover 57% probable. Maximum motivation.",
-    rec:"strong", recLabel:"🔥 Back ALG +1.5", recDetail:"Underdog covers 66% — strong value taking ALG +1.5." },
+    rec:"strong", recLabel:"🔥 Back ALG +1.25", recDetail:"Underdog covers 61% — strong value on ALG." },
 
   { id:"K1", stage:"GRP", date:"Jun 17", group:"Group K", venue:"Kansas City",
     home:"Portugal", homeFlag:"🇵🇹", homeCode:"POR", homePlayers:["POR"],
