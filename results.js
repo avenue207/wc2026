@@ -13,4 +13,7 @@ const RESULTS = {
   "A2": { home: 2, away: 1 },   // Jun 11 — Korea Republic 2-1 Czechia
   "B1": { home: 1, away: 1 },   // Jun 12 — Canada 1-1 Bosnia and Herzegovina
   "D1": { home: 4, away: 1 },   // Jun 12 — USA 4-1 Paraguay
+  "B2": { home: 1, away: 1 },   // Jun 13 — Qatar 1-1 Switzerland
+  "C3": { home: 0, away: 1 },   // Jun 14 — Haiti 0-1 Scotland
+  "H2": { home: 1, away: 1 },   // Jun 15 — Saudi Arabia 1-1 Uruguay
 };
