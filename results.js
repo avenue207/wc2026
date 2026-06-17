@@ -4,6 +4,8 @@
 //  The daily bot or manual edit adds entries here.
 // ═══════════════════════════════════════════════
 const RESULTS = {
+  "L1": { home: 4, away: 2 },
+  "K1": { home: 1, away: 1 },
   "I1": { home: 3, away: 1 },
   "G1": { home: 1, away: 1 },
   "H1": { home: 0, away: 0 },
