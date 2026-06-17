@@ -17,4 +17,5 @@ const RESULTS = {
   "B2": { home: 1, away: 1 },   // Jun 13 — Qatar 1-1 Switzerland
   "C3": { home: 0, away: 1 },   // Jun 14 — Haiti 0-1 Scotland
   "H2": { home: 1, away: 1 },   // Jun 15 — Saudi Arabia 1-1 Uruguay
+  "J1": { home: 3, away: 0 },   // Jun 17 — Argentina 3-0 Algeria (Messi hat-trick)
 };
