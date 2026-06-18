@@ -238,10 +238,10 @@ const MATCHES = [
     home:"England", homeFlag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", homeCode:"ENG", homePlayers:["ENG"],
     away:"Ghana", awayFlag:"🇬🇭", awayCode:"GHA",
     homeML:-350, awayML:500,
-    ah:{ line:-1.5, homeLabel:"ENG -1.5", awayLabel:"GHA +1.5", homePayout:1.88, awayPayout:1.92 },
-    simHomeWin:79, simCoverAH:58, marketCoverAH:50, edge:8,
+    ah:{ line:-1.75, homeLabel:"ENG -1.75", awayLabel:"GHA +1.75", homePayout:1.9, awayPayout:2.04 },
+    simHomeWin:79, simCoverAH:31, marketCoverAH:52, edge:-21,
     notes:"England vs Ghana. Bellingham + Kane + Saka — quality difference is massive. 58% to cover -1.5.",
-    rec:"value", recLabel:"✅ ENG -1.5 VALUE", recDetail:"+8% edge. England's attack depth too much for Ghana. Solid mid-tournament pick." },
+    rec:"strong", recLabel:"🔥 Back GHA +1.75", recDetail:"Underdog covers 69% — strong value on GHA." },
 
   // ══════════════════════════════════════════════════════
   //  KNOCKOUT STAGE — PROJECTED LINES
