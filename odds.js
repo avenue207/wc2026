@@ -202,10 +202,10 @@ const MATCHES = [
     home:"Netherlands", homeFlag:"🇳🇱", homeCode:"NED", homePlayers:["NED"],
     away:"Sweden", awayFlag:"🇸🇪", awayCode:"SWE",
     homeML:-200, awayML:420,
-    ah:{ line:-0.75, homeLabel:"NED -0.75", awayLabel:"SWE +0.75", homePayout:1.9, awayPayout:2.0 },
-    simHomeWin:63, simCoverAH:46, marketCoverAH:51, edge:-5,
+    ah:{ line:-0.5, homeLabel:"NED -0.5", awayLabel:"SWE +0.5", homePayout:1.71, awayPayout:2.15 },
+    simHomeWin:63, simCoverAH:52, marketCoverAH:56, edge:-4,
     notes:"Netherlands vs Sweden. NED 63% win. Gakpo vs Swedish rearguard. -0.75 partial refund structure.",
-    rec:"value", recLabel:"✓ Back SWE +0.75", recDetail:"Underdog covers 54% — value on SWE." },
+    rec:"value", recLabel:"✓ Back NED -0.5", recDetail:"Sim cover 52% — slight edge on NED." },
 
   { id:"H3", stage:"GRP", date:"Jun 21", group:"Group H", venue:"Seattle",
     home:"Spain", homeFlag:"🇪🇸", homeCode:"ESP", homePlayers:["ESP"],
