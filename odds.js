@@ -220,10 +220,10 @@ const MATCHES = [
     home:"France", homeFlag:"🇫🇷", homeCode:"FRA", homePlayers:["FRA"],
     away:"Iraq", awayFlag:"🇮🇶", awayCode:"IRQ",
     homeML:-1000, awayML:1800,
-    ah:{ line:-2.5, homeLabel:"FRA -2.5", awayLabel:"IRQ +2.5", homePayout:2.08, awayPayout:1.81 },
-    simHomeWin:95, simCoverAH:31, marketCoverAH:47, edge:-16,
+    ah:{ line:-2.25, homeLabel:"FRA -2.25", awayLabel:"IRQ +2.25", homePayout:1.87, awayPayout:1.95 },
+    simHomeWin:95, simCoverAH:36, marketCoverAH:51, edge:-15,
     notes:"France vs Iraq (+7000 WC odds). Mbappé will be hungry. 95% win, 70% to win by 3+.",
-    rec:"strong", recLabel:"🔥 Back IRQ +2.5", recDetail:"Underdog covers 69% — strong value on IRQ." },
+    rec:"strong", recLabel:"🔥 Back IRQ +2.25", recDetail:"Underdog covers 64% — strong value on IRQ." },
 
   { id:"J2", stage:"GRP", date:"Jun 22", group:"Group J", venue:"Dallas",
     home:"Argentina", homeFlag:"🇦🇷", homeCode:"ARG", homePlayers:["ARG"],
@@ -238,10 +238,10 @@ const MATCHES = [
     home:"England", homeFlag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", homeCode:"ENG", homePlayers:["ENG"],
     away:"Ghana", awayFlag:"🇬🇭", awayCode:"GHA",
     homeML:-350, awayML:500,
-    ah:{ line:-1.75, homeLabel:"ENG -1.75", awayLabel:"GHA +1.75", homePayout:1.9, awayPayout:2.04 },
-    simHomeWin:79, simCoverAH:31, marketCoverAH:52, edge:-21,
+    ah:{ line:-1.5, homeLabel:"ENG -1.5", awayLabel:"GHA +1.5", homePayout:1.67, awayPayout:2.2 },
+    simHomeWin:79, simCoverAH:35, marketCoverAH:57, edge:-22,
     notes:"England vs Ghana. Bellingham + Kane + Saka — quality difference is massive. 58% to cover -1.5.",
-    rec:"strong", recLabel:"🔥 Back GHA +1.75", recDetail:"Underdog covers 69% — strong value on GHA." },
+    rec:"strong", recLabel:"🔥 Back GHA +1.5", recDetail:"Underdog covers 65% — strong value on GHA." },
 
   // ══════════════════════════════════════════════════════
   //  KNOCKOUT STAGE — PROJECTED LINES
